@@ -22,30 +22,38 @@ class Node:
         self.level = level
         self.children_set = children_set
         self.same_val_set = same_val_set
-        self.self_son = None
+        self.self_chd = None
     
-    def generate_son(self, add_self_son=False):
+    def generate_chd(self, add_self_chd=False):
         '''
-            generate a new son node
+            generate a new child node
 
-            @add_self_son: True: add the new son node to self son
+            @add_self_son: True: add the new child node to self son
 
-            @return: the new son
+            #return: the new child
         '''
-        son = Node(val=self.val, parent=self.parent, 
+        chd = Node(val=self.val, parent=self.parent, 
         dist_to_prt=0.0, des_sum=len(self.same_val_set),
         level=self.level-1, children_set=[], 
         same_val_set=self.same_val_set)
 
-        if add_self_son:
-            self.self_son = son
-            self.children_set.append(self.self_son)
+        if add_self_chd:
+            self.self_chd = chd
+            self.children_set.append(self.self_chd)
         
-        return son
-
-    def remove_self_son(self):
-        self.children_set.remove(self.self_son)
-        self.self_son = None
+        return chd
     
+    def remove_chd(self, chd):
+        '''
+            remove a child
 
+            @chd: chd node obj
+        '''
+        if chd not in self.children_set:
+            raise Exception('remove_son: not such child')
+
+        if chd == self.self_chd:
+            self.self_chd = None
+
+        self.children_set.remove(chd)
 
