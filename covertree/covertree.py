@@ -12,6 +12,10 @@ class CoverTree:
             @dist_calculator: function to calculate distance
             @top_level: level of root node
         '''
+        if type(dist_calculator).__name__ != 'funciton':
+            raise Exception('dist_calculator is not a function!')
+        
+
         self.dist_calculator = dist_calculator
         self.level_stack = []
         self.top_level = top_level
@@ -25,6 +29,7 @@ class CoverTree:
 
             #return: True=>success; False=>fail;
         '''
+
         set = self.level_stack[0] if 0 != len(self.level_stack) else []
         self._insert(node, set,  self.top_level)
         
@@ -38,7 +43,13 @@ class CoverTree:
 
             #return: True=>success; False=>fail;
         '''
-        
+        #check if node's class is Node
+        if not node.__class__ != Node:
+            raise Exception('inserting a non-Node obj!')
+        #check if set's class is list
+        if cover_set.__class__ != [].__class__:
+            raise Exception('set not a list')
+
         #chech if a empty tree
         if None==self.root_node and self.top_level==level and (None==cover_set or 0==len(cover_set)):
             self.root_node = node
@@ -115,7 +126,9 @@ class CoverTree:
 
             #return: a set whose elements are children of set
         '''
-
+        #check if set's class is list
+        if set.__class__ != [].__class__:
+            raise Exception('set not a list')
         ret_set = []
         for n in set:
             ret_set += n.children_set
@@ -132,8 +145,14 @@ class CoverTree:
             @low_bound: lower bound of distance
             @high_bound: higher bound of distance 
         '''
+        #check if node's class is Node
+        if center_node.__class__ != Node:
+            raise Exception('inserting a non-Node obj!')
+        #check if set's class is list
+        if node_set.__class__ != [].__class__:
+            raise Exception('set not a list')
         d = self.dist_calculator
-        return filter(lambda x: d(x, center_node)>=low_bound and d(x, center_node) <= high_bound, node_set)
+        return filter(lambda x: d(x.val, center_node.val)>=low_bound and d(x.val, center_node.val) <= high_bound, node_set)
 
     def _update_des_sum(self, node):
         '''
@@ -142,6 +161,10 @@ class CoverTree:
 
             @node: the node to update
         '''
+        #check if node's class is Node
+        if not node.__class__ != Node:
+            raise Exception('inserting a non-Node obj!')
+
         p = node
         while True:
             p.des_sum += 1
@@ -172,10 +195,26 @@ class CoverTree:
             parent = son
 
     def _distance_bew_node_set(self, node, set):
+        '''
+            calculate the dist between node and a set
+
+            @node: the node to calculate
+            @set: the set to calculate
+
+            #return: [minimum_distance, nearest node]
+        '''
+
+        #check if node's class is Node
+        if node.__class__ != Node:
+            raise Exception('inserting a non-Node obj!')
+        #check if set's class is list
+        if set.__class__ != [].__class__:
+            raise Exception('set not a list')
+
         min_dist = float('inf')
         nearest_node = None
         for n in node:
-            dist = self.dist_calculator(n, node)
+            dist = self.dist_calculator(n.val, node.val)
             if dist < min_dist:
                 min_dist = dist
                 nearest_node = n
