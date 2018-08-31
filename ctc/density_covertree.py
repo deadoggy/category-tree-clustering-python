@@ -1,7 +1,7 @@
 #coding:utf-8
 
-from node import Node
-from covertree import CoverTree
+from covertree.node import Node
+from covertree.covertree import CoverTree
 
 class DensityCoverTree(CoverTree) :
     

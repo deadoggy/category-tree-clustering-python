@@ -47,7 +47,7 @@ class CoverTree:
         if not node.__class__ != Node:
             raise Exception('inserting a non-Node obj!')
         #check if set's class is list
-        if cover_set.__class__ != [].__class__:
+        if type(cover_set) != list:
             raise Exception('set not a list')
 
         #chech if a empty tree
@@ -127,7 +127,7 @@ class CoverTree:
             #return: a set whose elements are children of set
         '''
         #check if set's class is list
-        if set.__class__ != [].__class__:
+        if type(set) != list:
             raise Exception('set not a list')
         ret_set = []
         for n in set:
@@ -149,7 +149,7 @@ class CoverTree:
         if center_node.__class__ != Node:
             raise Exception('inserting a non-Node obj!')
         #check if set's class is list
-        if node_set.__class__ != [].__class__:
+        if type(node_set) != list:
             raise Exception('set not a list')
         d = self.dist_calculator
         return filter(lambda x: d(x.val, center_node.val)>=low_bound and d(x.val, center_node.val) <= high_bound, node_set)
@@ -208,7 +208,7 @@ class CoverTree:
         if node.__class__ != Node:
             raise Exception('inserting a non-Node obj!')
         #check if set's class is list
-        if set.__class__ != [].__class__:
+        if type(set) != list:
             raise Exception('set not a list')
 
         min_dist = float('inf')
