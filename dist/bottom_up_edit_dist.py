@@ -103,25 +103,63 @@ def __compact(t1, t2, graph, k):
         @k: a dict whose keys are CateTreeNode and values are __GraphNode
     '''
 
-    L = {}
     traveseQueue = Queue()
 
-    gn = __GraphNode('leaf', 1, len(graph))
-    graph.append(gn)
-    L['leaf'] = gn
+    leaf_gn = __GraphNode('leaf', 1, len(graph))
+    graph.append(leaf_gn)
 
     for leaf_node in t1.leaves_set + t2.leaves_set:
-        gn.node_set.append(leaf_node)
+        leaf_gn.node_set.append(leaf_node)
         traveseQueue.put(leaf_node)
+        k[leaf_node] = leaf_gn
 
     while len(traveseQueue)!=0:
         v = traveseQueue.get()
         if 0!=len(v.chd_set):
-            pass
-            #TODO:
-            
-
-
+            found = False
+            # travese graph reversely to see if there are equal class
+            for g_i in xrange(len(graph)-1, -1, -1):
+                w = graph[g_i]
+                if len(w.out_set)!=len(v.chd_set) or w.label!=v.label or w.height!=v.height:
+                    continue
+                
+                is_same = True
+                #get equal class of child nodes
+                w_chd_eq_cls = w.out_set
+                v_chd_eq_cls = []
+                for n in v.chd_set:
+                    v_chd_eq_cls.append(k[n])
+                #sorted by index of __GraphNode and compare them
+                srted_w_chd_eq_cls = sorted(w_chd_eq_cls, cmp=lambda x,y:cmp(x.index, y.index))
+                srted_v_chd_eq_cls = sorted(v_chd_eq_cls, cmp=lambda x,y:cmp(x.index, y.index))
+                for w_i in xrange(srted_w_chd_eq_cls):
+                    w_n = srted_w_chd_eq_cls[w_i]
+                    v_n = srted_v_chd_eq_cls[w_i]
+                    if 0!=cmp(w_n.index, v_n.index):
+                        is_same = False
+                        break
+                if is_same:
+                    if k.has_key(v) and k[v].index!=w.index:
+                        raise Exception('error when set K[v]: K[v] has been set')
+                    k[v] = w
+                    w.node_set.append(v)
+                    found = True
+                    break
+            # if not found, add a new __GraphNode
+            if not found:
+                new_gn = __GraphNode(v.label, v.heght, len(graph))
+                k[v] = new_gn
+                for chd in v.chd_set:
+                    if not k.has_key(chd):
+                        raise Exception('not all children of v are in K')
+                    k[chd].in_set.append(new_gn)
+                    new_gn.out_set.append(k[chd])                
+                graph.append(new_gn)
+        if v!=t1.root and v!=t2.root:
+            v.parent.unprocessed_son_size -= 1
+            if 0==len(v.parent.unprocessed_son_size):
+                traveseQueue.put(v.parent)
+     
 def __mapping(t1, t2, graph, k, m12, m21):
     pass
 
