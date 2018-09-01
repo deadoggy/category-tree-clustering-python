@@ -94,11 +94,32 @@ class __GraphNode:
 
 
 def __compact(t1, t2, graph, k):
+    '''
+        compact t1 and t2 to @graph and @k
+        
+        @t1: CateTree
+        @t2: CateTree
+        @graph: a list of __GraphNode
+        @k: a dict whose keys are CateTreeNode and values are __GraphNode
+    '''
+
     L = {}
     traveseQueue = Queue()
-    
-    #travese all nodes to init graph
-    initQueue
+
+    gn = __GraphNode('leaf', 1, len(graph))
+    graph.append(gn)
+    L['leaf'] = gn
+
+    for leaf_node in t1.leaves_set + t2.leaves_set:
+        gn.node_set.append(leaf_node)
+        traveseQueue.put(leaf_node)
+
+    while len(traveseQueue)!=0:
+        v = traveseQueue.get()
+        if 0!=len(v.chd_set):
+            pass
+            #TODO:
+            
 
 
 def __mapping(t1, t2, graph, k, m12, m21):
