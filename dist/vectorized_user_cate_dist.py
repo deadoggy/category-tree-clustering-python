@@ -111,34 +111,32 @@ class CateTree:
         return sum_similarity
 
 
-def vectorized_convertor(uid, bus_cate_dict, other_para):
+def vectorized_convertor(uid, bus_cate_dict, **kwargs):
     '''
         convert a user's category data to data a vector
 
         @uid: user id
         @bus_cate_dict: a dict whose keys are business ids and values are category paths
-        @other_para: a dict of other parameter, {'pivots':[], 'sigma': val} 
+        @kwargs: a dict of other parameter, {'pivots':[], 'sigma': val} 
 
         #return: feature vector
     '''
     
-    if type(other_para) != list:
-        raise Exception('other_para must be a list')
     if type(bus_cate_dict) != dict:
         raise Exception('bus_cate_dict must be a dict')
 
-    pivots = other_para['pivots']
+    pivots = kwargs['pivots']
     if type(pivots) != list:
-        raise Exception('pivots in other_para must be a list of CateTree')
-    sigma = other_para['sigma']
+        raise Exception('pivots in kwargs must be a list of CateTree')
+    sigma = kwargs['sigma']
     if type(sigma) != float and type(sigma)!=int:
-        raise Exception('sigma in other_para must be a float or an int')
+        raise Exception('sigma in kwargs must be a float or an int')
     
     feature_arr = np.array([0 for i in xrange(len(pivots))])
     for d in xrange(len(pivots)):
         t = pivots[d]
         if t.__class__ != CateTree:
-            raise Exception('the ' + str(d) + '-th pivot not a CateTree')
+            raise Exception('the %d-th pivot not a CateTree' % d)
         feature_arr[d] = np.exp(-t.similarity(bus_cate_dict.values()/(2*np.power(sigma, 2))))
     return feature_arr
 

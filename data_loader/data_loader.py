@@ -72,7 +72,7 @@ class DataLoader:
             paths += self.get_business_cate_path(bs)
         return paths
 
-    def load(self, convert_func, other_para={}):
+    def load(self, convert_func, **kwargs):
         '''
             load a user's all category path
         
@@ -83,14 +83,12 @@ class DataLoader:
             is a dict {business_1: [[path_1],[path_2],...], ...} and
             other_para is a list of other helpful parameters.
             Return of the fucntion is a data node
-            @other_para: a dict of other parameters to deliver to convert_func
+            @kwargs: a dict of other parameters to deliver to convert_func
 
             #return: a list of data node
         '''
         if type(convert_func).__name__ != 'function':
             raise Exception('convert_func must be a function')
-        if type(other_para) != list:
-            raise Exception('other_para must be a list')
 
         with open(self.data_file_name) as user_data_f:
             user_data = json.load(user_data_f)
@@ -100,7 +98,7 @@ class DataLoader:
             bus_dict = {}
             for bid in user_data[uid]:
                 bus_dict[bid] = self.get_business_cate_path(bid)
-            ret_data.append(convert_func(uid, bus_dict, other_para))
+            ret_data.append(convert_func(uid, bus_dict, kwargs))
         return ret_data
 
         
