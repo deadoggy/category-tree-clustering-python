@@ -72,7 +72,7 @@ class DataLoader:
             paths += self.get_business_cate_path(bs)
         return paths
 
-    def load(self, convert_func, other_para=[]):
+    def load(self, convert_func, other_para={}):
         '''
             load a user's all category path
         
@@ -83,6 +83,7 @@ class DataLoader:
             is a dict {business_1: [[path_1],[path_2],...], ...} and
             other_para is a list of other helpful parameters.
             Return of the fucntion is a data node
+            @other_para: a dict of other parameters to deliver to convert_func
 
             #return: a list of data node
         '''

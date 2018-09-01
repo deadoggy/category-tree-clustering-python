@@ -1,7 +1,7 @@
 #coding: utf-8
 
 from data_loader.data_loader import DataLoader
-
+import numpy as np
 
 class CateTreeNode:
 
@@ -112,16 +112,73 @@ class CateTree:
 
 
 def vectorized_convertor(uid, bus_cate_dict, other_para):
+    '''
+        convert a user's category data to data a vector
+
+        @uid: user id
+        @bus_cate_dict: a dict whose keys are business ids and values are category paths
+        @other_para: a dict of other parameter, {'pivots':[], 'sigma': val} 
+
+        #return: feature vector
+    '''
+    
     if type(other_para) != list:
         raise Exception('other_para must be a list')
     if type(bus_cate_dict) != dict:
         raise Exception('bus_cate_dict must be a dict')
 
-    pivots = other_para[0]
+    pivots = other_para['pivots']
+    if type(pivots) != list:
+        raise Exception('pivots in other_para must be a list of CateTree')
+    sigma = other_para['sigma']
+    if type(sigma) != float and type(sigma)!=int:
+        raise Exception('sigma in other_para must be a float or an int')
+    
+    feature_arr = np.array([0 for i in xrange(len(pivots))])
+    for d in xrange(len(pivots)):
+        t = pivots[d]
+        if t.__class__ != CateTree:
+            raise Exception('the ' + str(d) + '-th pivot not a CateTree')
+        feature_arr[d] = np.exp(-t.similarity(bus_cate_dict.values()/(2*np.power(sigma, 2))))
+    return feature_arr
 
+
+def vectorized_dist_calculator(v_1, v_2):
+    '''
+        calculate distance between v_1 and v_2
+        @v_1:
+        @v_2:
+
+        #return: distance value, a float
+    '''
+    if type(v_1)!=np.ndarray or type(v_2)!=np.ndarray:
+        raise Exception('parameters must be np.ndarray')
+    
+    if np.shape(v_1) != np.shape(v_2):
+        raise Exception('v_1 and v_2 must share a common shape')
+
+    return np.sqrt(np.sum(np.square(v_1-v_2)))
 
 
 def generate_category_tree(data_loader):
+    '''
+        generate CateTree pivots 
 
+        @data_loader: an instance of DataLoader
+
+        #return: a list of CateTree
+    '''
+    if data_loader.__class__ != DataLoader:
+        raise Exception('data_loader must be an instance of DataLoader')
+
+    pivots_dict = {}
+    all_paths = data_loader.get_all_cate_path()
+    for path in all_paths:
+        tree_name = path[0]
+        if not pivots_dict.has_key(tree_name):
+            pivots_dict[tree_name] = CateTree()
+        pivots_dict[tree_name].insert(path)
+    
+    return pivots_dict.values()
 
     
