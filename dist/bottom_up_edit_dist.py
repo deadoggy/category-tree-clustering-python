@@ -17,6 +17,7 @@ class BUEditTreeNode:
         self.des_sum = 0
         self.chd_set = []
         self.unprocessed_son_size = 0
+        self.root = None
 
 class BUEditTree:
 
@@ -26,6 +27,7 @@ class BUEditTree:
             @tree_name: name of this tree
         '''
         self.root = BUEditTreeNode(tree_name, 0, None)
+        self.root.root = self.root
         self.leaves_set = []
         self.size = 1
     
@@ -49,6 +51,7 @@ class BUEditTree:
                     break
             if next_p is None:
                 next_p = BUEditTreeNode(label, -1, p)
+                next_p.root = self.root
                 p.chd_set.append(next_p)
                 p.unprocessed_son_size += 1
                 self.size += 1
@@ -66,6 +69,7 @@ class BUEditTree:
                 current_node.height = 1
                 current_node.des_sum = 0
                 continue
+                
             max_height = -float('inf')
             total_des = len(current_node.chd_set)
             for chd in current_node.chd_set:
@@ -113,7 +117,7 @@ def __compact(t1, t2, graph, k):
         traveseQueue.put(leaf_node)
         k[leaf_node] = leaf_gn
 
-    while len(traveseQueue)!=0:
+    while not traveseQueue.empty():
         v = traveseQueue.get()
         if 0!=len(v.chd_set):
             found = False
@@ -161,7 +165,64 @@ def __compact(t1, t2, graph, k):
                 traveseQueue.put(v.parent)
      
 def __mapping(t1, t2, graph, k, m12, m21):
-    pass
+    '''
+        map nodes between t1 and t2
+
+        @t1: a CateTree
+        @t2: a CateTree
+        @graph: a list of __GraphNode
+        @k: a dict, whose keys are CateTreeNode, whose values are __GraphNode
+        @m12: a empty dict, map nodes in t1 to nodes in t2
+        @m21: a empty dict, map nodes in t2 to nodes in t1
+    '''
+    if len(graph)==0 or len(k)==0:
+        raise Exception('graph/K empty')
+    
+    traverse_queue = Queue()
+    traverse_queue.put(t1.root)
+    while not traverse_queue.empty():
+        # poll a BUEditTreeNode:
+        v = traverse_queue.get()
+        # leaf node's mapping is delivered to their parent node
+        if 0==len(v.chd_set):
+            continue
+        # chd nodes enqueue
+        for n in v.chd_set:
+            traverse_queue.put(n)
+        # map
+        if not m12.has_key(v):
+            #unordered tree, there is no need to find the first left equal class
+            w = None
+            gn = k[v]
+            for eqn in gn.node_set:
+                if eqn.root==t2.root and not m21.has_key(eqn):
+                    w = eqn
+                    break
+            if w is None:
+                continue
+            if not k.has_key(w):
+                raise Exception('error in mapping: w not in k')
+            if k[w] != k[v]:
+                raise Exception('graph and K do not consist')
+
+            #using queue to map trees of v and w
+            w_queue = Queue()
+            v_queue = Queue()
+            w_queue.put(w)
+            v_queue.put(v)
+            while not w_queue.empty():
+                n_w_queue = w_queue.get()
+                n_v_queue = v_queue.get()
+                m12.put(n_v_queue,n_w_queue)
+                m21.put(n_w_queue,n_v_queue)
+                #sort chd_set to ensure responsing
+                srted_nw_chd = sorted(n_w_queue.chd_set, cmp=lambda x,y:cmp(x.label, y.label))
+                srted_nv_chd = sorted(n_v_queue.chd_set, cmp=lambda x,y:cmp(x.label, y.label))
+                for i in xrange(len(srted_nw_chd)):
+                    w_queue.put(srted_nw_chd[i])
+                    v_queue.put(srted_nv_chd[i])
+
+
 
 def bottomup_edit_dist_calculator(t1, t2):
     '''
