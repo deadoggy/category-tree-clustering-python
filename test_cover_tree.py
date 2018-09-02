@@ -10,6 +10,8 @@ def eul_dist(a,b):
 class CoverTreeTest(unittest.TestCase):
 
     def setUp(self):
+        if self.__dict__.has_key('cover_tree'):
+            return
         #read iris data from iris.data
         with open('iris.data') as iris_f:
             iris_data = iris_f.read().split('\n')
@@ -35,8 +37,6 @@ class CoverTreeTest(unittest.TestCase):
             for n in self.cover_tree.level_stack[i]:
                 is_dist_valid = n.parent.self_chd is not n and n.dist_to_prt<np.power(2.0, self.cover_tree.top_level-(i-1))
                 is_parent = n.parent.self_chd is n and n.dist_to_prt==0.0
-                if not (is_dist_valid or is_parent):
-                    print 'stub'
                 assert is_dist_valid or is_parent
     
     def test_separation(self):
@@ -44,7 +44,7 @@ class CoverTreeTest(unittest.TestCase):
             level = self.cover_tree.level_stack[l]
             for i in xrange(len(level)-1):
                 for j in xrange(i+1, len(level)):
-                    assert eul_dist(level[i].val, level[j].val) < np.power(2.0, self.cover_tree.top_level-l)
+                    assert eul_dist(level[i].val, level[j].val) > np.power(2.0, self.cover_tree.top_level-l)
     
     def test_nesting(self):
         sum_bottom_level = 0

@@ -65,10 +65,6 @@ class CoverTree:
         if is_new_level:
             self._push_level_stack(node)
 
-        #test#
-        if level == -5 and len(self.level_stack[-1])==92:
-            print 'stub'
-        #....#
         #get children set in 2^level range
         chd_set = self._get_children_set(cover_set)
         dist_bound = np.power(2.0, level)
