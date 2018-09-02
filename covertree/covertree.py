@@ -2,6 +2,8 @@
 
 from node import Node
 import math
+from time import clock
+import numpy as np
 
 class CoverTree:
 
@@ -12,7 +14,7 @@ class CoverTree:
             @dist_calculator: function to calculate distance
             @top_level: level of root node
         '''
-        if type(dist_calculator).__name__ != 'funciton':
+        if type(dist_calculator).__name__ != 'function':
             raise Exception('dist_calculator is not a function!')
         
 
@@ -44,7 +46,7 @@ class CoverTree:
             #return: True=>success; False=>fail;
         '''
         #check if node's class is Node
-        if not node.__class__ != Node:
+        if node.__class__ != Node:
             raise Exception('inserting a non-Node obj!')
         #check if set's class is list
         if type(cover_set) != list:
@@ -61,16 +63,21 @@ class CoverTree:
         #if level <= current max level, push a new level
         is_new_level = level <= self.top_level-(len(self.level_stack)-1)
         if is_new_level:
-            self._push_level_stack()
+            self._push_level_stack(node)
 
+        #test#
+        if level == -5 and len(self.level_stack[-1])==92:
+            print 'stub'
+        #....#
         #get children set in 2^level range
         chd_set = self._get_children_set(cover_set)
-        dist_bound = 2**level
+        dist_bound = np.power(2.0, level)
         valid_chd_set = self._filter(node, chd_set, 0.0, dist_bound)
+
         if 0 == len(valid_chd_set):
             #if a new level, pop it
             if is_new_level:
-                self._pop_level_stack();
+                self._pop_level_stack()
             return False
         
         parent_info = self._distance_bew_node_set(node, cover_set)
@@ -87,7 +94,7 @@ class CoverTree:
             if parent_info[0] > dist_bound:
                 if is_new_level:
                     self._pop_level_stack()
-                    return False
+                return False
             #can insert to this level
             parent_node = parent_info[1]
             parent_node.children_set.append(node)
@@ -101,13 +108,13 @@ class CoverTree:
         else:
             return True
             
-    def _push_level_stack(self):
+    def _push_level_stack(self, no = None):
         '''
             add a new level to level stack
         '''
         new_level = []
         for n in self.level_stack[-1]:
-            new_level.append(n.generate_chd(True))
+            new_level.append(n.generate_chd(True, no=no))
         self.level_stack.append(new_level)
         
     def _pop_level_stack(self):
@@ -132,7 +139,7 @@ class CoverTree:
         ret_set = []
         for n in set:
             ret_set += n.children_set
-            if None==n.self_chd:
+            if n.self_chd is None:
                 ret_set.append(n.generate_chd(False))
         return ret_set
 
@@ -162,7 +169,7 @@ class CoverTree:
             @node: the node to update
         '''
         #check if node's class is Node
-        if not node.__class__ != Node:
+        if node.__class__ != Node:
             raise Exception('inserting a non-Node obj!')
 
         p = node
@@ -194,7 +201,7 @@ class CoverTree:
             self.level_stack[self.top_level-i].append(son)
             parent = son
 
-    def _distance_bew_node_set(self, node, set):
+    def _distance_bew_node_set(self, node, n_set):
         '''
             calculate the dist between node and a set
 
@@ -208,12 +215,12 @@ class CoverTree:
         if node.__class__ != Node:
             raise Exception('inserting a non-Node obj!')
         #check if set's class is list
-        if type(set) != list:
+        if type(n_set) != list:
             raise Exception('set not a list')
 
         min_dist = float('inf')
         nearest_node = None
-        for n in node:
+        for n in n_set:
             dist = self.dist_calculator(n.val, node.val)
             if dist < min_dist:
                 min_dist = dist

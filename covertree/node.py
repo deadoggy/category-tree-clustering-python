@@ -3,7 +3,7 @@
 class Node:
     
     def __init__(self, val=None, parent=None, dist_to_prt=None,
-                des_sum=0, level=0, children_set=[], same_val_set=[]):
+                des_sum=0, level=0, children_set=None, same_val_set=None):
         '''
             init function
             
@@ -20,11 +20,11 @@ class Node:
         self.dist_to_prt = dist_to_prt
         self.des_sum = des_sum
         self.level = level
-        self.children_set = children_set
-        self.same_val_set = same_val_set
+        self.children_set = children_set if children_set is not None else []
+        self.same_val_set = same_val_set if same_val_set is not None else []
         self.self_chd = None
     
-    def generate_chd(self, add_self_chd=False):
+    def generate_chd(self, add_self_chd=False, no=None):
         '''
             generate a new child node
 
@@ -32,8 +32,9 @@ class Node:
 
             #return: the new child
         '''
-        chd = Node(val=self.val, parent=self.parent, 
-        dist_to_prt=0.0, des_sum=len(self.same_val_set),
+        chd = Node(val=self.val, parent=self, 
+        dist_to_prt=0.0, 
+        des_sum=len(self.same_val_set),
         level=self.level-1, children_set=[], 
         same_val_set=self.same_val_set)
 
