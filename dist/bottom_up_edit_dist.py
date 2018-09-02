@@ -69,7 +69,7 @@ class BUEditTree:
                 current_node.height = 1
                 current_node.des_sum = 0
                 continue
-                
+
             max_height = -float('inf')
             total_des = len(current_node.chd_set)
             for chd in current_node.chd_set:
@@ -253,3 +253,20 @@ def bottomup_edit_dist_calculator(t1, t2):
             si += 1
     
     return d + i + si
+
+
+def bottomup_edit_dist_converter(uid, bus_cate_dict, **kwargs):
+    '''
+        convert a user's category data to data a BUEditTree
+
+        @uid: user id
+        @bus_cate_dict: a dict whose keys are business ids and values are category paths
+        @kwargs: a dict of other parameter, {'pivots':[], 'sigma': val} 
+
+        #return: feature vector
+    '''
+
+    t = BUEditTree(uid)
+    for path in bus_cate_dict.values():
+        t.insert(path)
+    return t
