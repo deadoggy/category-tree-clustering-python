@@ -23,6 +23,9 @@ class Node:
         self.children_set = children_set if children_set is not None else []
         self.same_val_set = same_val_set if same_val_set is not None else []
         self.self_chd = None
+
+        #test index
+        self.index = -1
     
     def generate_chd(self, add_self_chd=False, no=None):
         '''
@@ -37,6 +40,9 @@ class Node:
         des_sum=len(self.same_val_set),
         level=self.level-1, children_set=[], 
         same_val_set=self.same_val_set)
+
+        #test index
+        chd.index = self.index + 345
 
         if add_self_chd:
             self.self_chd = chd

@@ -79,10 +79,16 @@ class CoverTree:
         parent_info = self._distance_bew_node_set(node, cover_set)
         if 0.0==parent_info[0]:#already has this node
             parent_info[1].same_val_set.append(node)
-            self._update_des_sum(parent_info[1])
+            # update desendants from  the first node which not the self parent to root node
+            p_to_update = parent_info[1]
+            while p_to_update.dist_to_prt==0.0:
+                p_to_update = p_to_update.parent
+            self._update_des_sum(p_to_update.parent)
+
             if is_new_level:
                 self._pop_level_stack()
             return True
+
         if not self._insert(node, valid_chd_set, level-1):
             #insert fail
             

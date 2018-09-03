@@ -8,7 +8,6 @@ from covertree.node import Node
 from ctc.density_covertree import DensityCoverTree
 import numpy as np
 
-test_density = True
 def eul_dist(a,b):
     return np.sqrt(np.sum(np.square(a-b))) 
 
@@ -29,11 +28,12 @@ class CoverTreeTest(unittest.TestCase):
         data = (data-min_arr)/(max_arr-min_arr)
         
         #insert to a cover tree
-        self.cover_tree = CoverTree(eul_dist, 0) if test_density else DensityCoverTree(eul_dist, 0)
+        self.cover_tree = DensityCoverTree(eul_dist, 0)
 
         for i in xrange(rows):
-            print i
-            self.cover_tree.insert(Node(val=data[i]))
+            n = Node(val=data[i])
+            n.index = i
+            self.cover_tree.insert(n)
 
     def test_covering(self):
         for i in xrange(len(self.cover_tree.level_stack)-1, 0, -1):
@@ -55,6 +55,18 @@ class CoverTreeTest(unittest.TestCase):
             sum_bottom_level += len(n.same_val_set) + 1
         assert sum_bottom_level == self.data_sum
 
+    def test_density(self):
+        bottom_level = self.cover_tree.level_stack[-1]
+        for level in self.cover_tree.level_stack:
+            for n1 in level:
+                count = 0
+
+                for n2 in bottom_level:
+                    if eul_dist(n1.val, n2.val) <= np.power(2.0, n1.level) :
+                        count += 1
+                        count += len(n2.same_val_set)
+                density = self.cover_tree.estimate_density(n1)
+                assert count == density
 
 
 unittest.main()
