@@ -1,17 +1,21 @@
 #coding:utf-8
 
+import sys
+sys.path.append(sys.path[0] + '/../')
 import unittest
 from covertree.covertree import CoverTree
 from covertree.node import Node
+from ctc.density_covertree import DensityCoverTree
 import numpy as np
 
+test_density = True
 def eul_dist(a,b):
     return np.sqrt(np.sum(np.square(a-b))) 
+
 class CoverTreeTest(unittest.TestCase):
 
     def setUp(self):
-        if self.__dict__.has_key('cover_tree'):
-            return
+
         #read iris data from iris.data
         with open('iris.data') as iris_f:
             iris_data = iris_f.read().split('\n')
@@ -25,12 +29,11 @@ class CoverTreeTest(unittest.TestCase):
         data = (data-min_arr)/(max_arr-min_arr)
         
         #insert to a cover tree
-        self.cover_tree = CoverTree(eul_dist, 0)
+        self.cover_tree = CoverTree(eul_dist, 0) if test_density else DensityCoverTree(eul_dist, 0)
 
         for i in xrange(rows):
             print i
             self.cover_tree.insert(Node(val=data[i]))
-        print 'stub'
 
     def test_covering(self):
         for i in xrange(len(self.cover_tree.level_stack)-1, 0, -1):
@@ -51,5 +54,7 @@ class CoverTreeTest(unittest.TestCase):
         for n in self.cover_tree.level_stack[-1]:
             sum_bottom_level += len(n.same_val_set) + 1
         assert sum_bottom_level == self.data_sum
+
+
 
 unittest.main()

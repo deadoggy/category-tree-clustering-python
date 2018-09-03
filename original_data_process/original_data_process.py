@@ -1,5 +1,7 @@
 #coding:utf-8
 
+import sys
+sys.path.append(sys.path[0] + '/../')
 from config.load_config import Config
 import json
 import pandas as pd

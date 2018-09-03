@@ -1,5 +1,7 @@
 #coding:utf-8
 
+import sys
+sys.path.append(sys.path[0] + '/../')
 from covertree.node import Node
 from covertree.covertree import CoverTree
 

@@ -1,5 +1,7 @@
 #coding:utf-8
 
+import sys
+sys.path.append(sys.path[0] + '/../')
 from covertree.covertree import CoverTree
 from covertree.node import Node
 from density_covertree import DensityCoverTree
