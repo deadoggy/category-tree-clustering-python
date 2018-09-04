@@ -80,10 +80,10 @@ class DataLoader:
         
             @convert_func: convert function, to convert 
             category path to data point. Parameters of convert_func
-            is: uid, business_categorypath_dict and a other_para. uid is
+            is: uid, business_categorypath_dict and a kwargs. uid is
             the id of a user, business_categorypath_dict
             is a dict {business_1: [[path_1],[path_2],...], ...} and
-            other_para is a list of other helpful parameters.
+            kwargs is a list of other helpful parameters.
             Return of the fucntion is a data node
             @kwargs: a dict of other parameters to deliver to convert_func
 
