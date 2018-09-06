@@ -268,8 +268,9 @@ def bottomup_edit_dist_converter(uid, bus_cate_dict, kwargs):
 
     t = BUEditTree(uid)
     path_set = []
-    for p in bus_cate_dict.values():
-        path_set.append(p)
+    for ps in bus_cate_dict.values():
+        for p in ps:
+            path_set.append(p)
     for path in path_set:
         t.insert(path)
     return t
