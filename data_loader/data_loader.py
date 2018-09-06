@@ -5,6 +5,7 @@ sys.path.append(sys.path[0] + '/../')
 from config.load_config import Config
 import csv
 import json
+import time
 
 class DataLoader:
 
@@ -91,7 +92,7 @@ class DataLoader:
         '''
         if type(convert_func).__name__ != 'function':
             raise Exception('convert_func must be a function')
-
+        print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' begin loading...'
         with open(self.data_file_name) as user_data_f:
             user_data = json.load(user_data_f)
         
@@ -101,6 +102,7 @@ class DataLoader:
             for bid in user_data[uid]:
                 bus_dict[bid] = self.get_business_cate_path(bid)
             ret_data.append(convert_func(uid, bus_dict, kwargs))
+        print time.strftime('%Y-%m-%d H:M:S',time.localtime(time.time())) + ' loading finished'
         return ret_data
 
         

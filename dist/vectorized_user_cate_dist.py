@@ -14,9 +14,9 @@ class CateTreeNode:
             @laebl: label of the node
             @parent: parent node
         '''
-        if type(label)!=list:
-            raise Exception('label must be a str')
-        if parent.__class__!=CateTreeNode:
+        if type(label)!=str and type(label)!=unicode:
+            raise Exception('label must be str or unicode')
+        if parent is not None and parent.__class__!=CateTreeNode:
             raise Exception('parent must be a CateTreeNode')
 
         self.label = label
@@ -32,8 +32,8 @@ class CateTreeNode:
 
             #return: None if not exists, else the instance
         '''
-        if type(label) != str:
-            raise Exception('label must be label')
+        if type(label)!=str and type(label)!=unicode:
+            raise Exception('label must be str or unicode')
         
         for n in self.chd_set:
             if n.label == label:
@@ -91,15 +91,15 @@ class CateTree:
         sum_similarity = 0.0
         for path in path_set:
             similarity = 1.0
-            found = False
+            found = True
             p = self.root
-            for i in xrange(len(path)-1):
+            for i in xrange(len(path)):
                 label = path[i]
                 user_cate_node = p.find_label_in_chd(label)
                 if user_cate_node is not None:
                     bus_share = 0.0 if user_cate_node.bus_cnt==0 else 1.0
                     similarity *= 1.0/(len(user_cate_node.chd_set) + bus_share)
-                    if i == len(path)-2:
+                    if i == len(path)-1:
                         similarity *= 1.0/user_cate_node.bus_cnt
                     
                     p = user_cate_node
@@ -110,10 +110,11 @@ class CateTree:
             if found:
                 sum_similarity += similarity
         
+    
         return sum_similarity
 
 
-def vectorized_convertor(uid, bus_cate_dict, **kwargs):
+def vectorized_convertor(uid, bus_cate_dict, kwargs):
     '''
         convert a user's category data to data a vector
 
@@ -134,12 +135,16 @@ def vectorized_convertor(uid, bus_cate_dict, **kwargs):
     if type(sigma) != float and type(sigma)!=int:
         raise Exception('sigma in kwargs must be a float or an int')
     
-    feature_arr = np.array([0 for i in xrange(len(pivots))])
+    feature_arr = np.array([0.0 for i in xrange(len(pivots))])
+    path_sets = []
+    for key in bus_cate_dict.keys():
+        for p in bus_cate_dict[key]:
+            path_sets.append(p)
     for d in xrange(len(pivots)):
         t = pivots[d]
         if t.__class__ != CateTree:
             raise Exception('the %d-th pivot not a CateTree' % d)
-        feature_arr[d] = np.exp(-t.similarity(bus_cate_dict.values()/(2*np.power(sigma, 2))))
+        feature_arr[d] = np.exp(-t.similarity(path_sets)/(2.0*np.power(sigma, 2)))
     return feature_arr
 
 

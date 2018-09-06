@@ -255,7 +255,7 @@ def bottomup_edit_dist_calculator(t1, t2):
     return d + i + si
 
 
-def bottomup_edit_dist_converter(uid, bus_cate_dict, **kwargs):
+def bottomup_edit_dist_converter(uid, bus_cate_dict, kwargs):
     '''
         convert a user's category data to data a BUEditTree
 
@@ -267,6 +267,9 @@ def bottomup_edit_dist_converter(uid, bus_cate_dict, **kwargs):
     '''
 
     t = BUEditTree(uid)
-    for path in bus_cate_dict.values():
+    path_set = []
+    for p in bus_cate_dict.values():
+        path_set.append(p)
+    for path in path_set:
         t.insert(path)
     return t

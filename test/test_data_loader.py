@@ -14,5 +14,6 @@ class DataLoaderTester(unittest.TestCase):
         
         data = loader.load(convert_func, arg1=1)
         print 'load done'
+    
 
 unittest.main()
