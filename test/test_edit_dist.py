@@ -51,12 +51,10 @@ class EditDistTest(unittest.TestCase):
         thd_tree = self.data[random_index_3]
         assert bottomup_edit_dist_calculator(base_tree, sec_tree) + bottomup_edit_dist_calculator(sec_tree, thd_tree) >= bottomup_edit_dist_calculator(base_tree, thd_tree)
         
-        # 4.one empty and another not empty => dist == size(not empty tree)
+        # 4.one empty and another not empty => dist == size(not empty tree)-1
         empty_tree = BUEditTree('empty')
         d = bottomup_edit_dist_calculator(empty_tree, base_tree)
-        print d
-        print base_tree.size
-        assert base_tree.size == d
+        assert base_tree.size-1  == d
         
 
 unittest.main()
