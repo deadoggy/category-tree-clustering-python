@@ -102,7 +102,7 @@ class DataLoader:
             for bid in user_data[uid]:
                 bus_dict[bid] = self.get_business_cate_path(bid)
             ret_data.append(convert_func(uid, bus_dict, kwargs))
-        print time.strftime('%Y-%m-%d H:M:S',time.localtime(time.time())) + ' loading finished'
+        print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' loading finished'
         return ret_data
 
         

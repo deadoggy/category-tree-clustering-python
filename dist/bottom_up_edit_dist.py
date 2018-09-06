@@ -116,8 +116,8 @@ def __compact(t1, t2, graph, k):
         leaf_gn.node_set.append(leaf_node)
         traveseQueue.put(leaf_node)
         k[leaf_node] = leaf_gn
-
     while not traveseQueue.empty():
+        
         v = traveseQueue.get()
         if 0!=len(v.chd_set):
             found = False
@@ -136,7 +136,7 @@ def __compact(t1, t2, graph, k):
                 #sorted by index of __GraphNode and compare them
                 srted_w_chd_eq_cls = sorted(w_chd_eq_cls, cmp=lambda x,y:cmp(x.index, y.index))
                 srted_v_chd_eq_cls = sorted(v_chd_eq_cls, cmp=lambda x,y:cmp(x.index, y.index))
-                for w_i in xrange(srted_w_chd_eq_cls):
+                for w_i in xrange(len(srted_w_chd_eq_cls)):
                     w_n = srted_w_chd_eq_cls[w_i]
                     v_n = srted_v_chd_eq_cls[w_i]
                     if 0!=cmp(w_n.index, v_n.index):
@@ -151,7 +151,7 @@ def __compact(t1, t2, graph, k):
                     break
             # if not found, add a new __GraphNode
             if not found:
-                new_gn = __GraphNode(v.label, v.heght, len(graph))
+                new_gn = __GraphNode(v.label, v.height, len(graph))
                 k[v] = new_gn
                 for chd in v.chd_set:
                     if not k.has_key(chd):
@@ -161,8 +161,9 @@ def __compact(t1, t2, graph, k):
                 graph.append(new_gn)
         if v!=t1.root and v!=t2.root:
             v.parent.unprocessed_son_size -= 1
-            if 0==len(v.parent.unprocessed_son_size):
+            if 0==v.parent.unprocessed_son_size:
                 traveseQueue.put(v.parent)
+                v.parent.unprocessed_son_size = len(v.parent.chd_set) # recover unrocessed_son_size to supply next computation
      
 def __mapping(t1, t2, graph, k, m12, m21):
     '''
@@ -177,7 +178,6 @@ def __mapping(t1, t2, graph, k, m12, m21):
     '''
     if len(graph)==0 or len(k)==0:
         raise Exception('graph/K empty')
-    
     traverse_queue = Queue()
     traverse_queue.put(t1.root)
     while not traverse_queue.empty():
@@ -213,8 +213,8 @@ def __mapping(t1, t2, graph, k, m12, m21):
             while not w_queue.empty():
                 n_w_queue = w_queue.get()
                 n_v_queue = v_queue.get()
-                m12.put(n_v_queue,n_w_queue)
-                m21.put(n_w_queue,n_v_queue)
+                m12[n_v_queue] = n_w_queue
+                m21[n_w_queue] = n_v_queue
                 #sort chd_set to ensure responsing
                 srted_nw_chd = sorted(n_w_queue.chd_set, cmp=lambda x,y:cmp(x.label, y.label))
                 srted_nv_chd = sorted(n_v_queue.chd_set, cmp=lambda x,y:cmp(x.label, y.label))
@@ -234,7 +234,7 @@ def bottomup_edit_dist_calculator(t1, t2):
         #return: bottom up distance
     '''
 
-    if t1==t2:
+    if t1 is t2:
         return 0.0
 
     graph = []
@@ -246,12 +246,15 @@ def bottomup_edit_dist_calculator(t1, t2):
     __mapping(t1, t2, graph, k, m12, m21)
     d = t1.size - len(m12)
     i = t2.size - len(m12)
+    #ignore the root node
+    if t1.root.label != t2.root.label:
+        d -= 1
+        i -= 1
 
     si = 0
     for e in m12.keys():
         if e.label != m12[e].label:
             si += 1
-    
     return d + i + si
 
 
@@ -274,3 +277,14 @@ def bottomup_edit_dist_converter(uid, bus_cate_dict, kwargs):
     for path in path_set:
         t.insert(path)
     return t
+
+
+def printNode(node, level):
+    content = ''
+    for i in xrange(level-1):
+        content += ' | '
+    content +=  '-' if 0==level else ' |-'
+    content +=  node.label + '\n'
+    for chd in node.chd_set:
+        content +=  printNode(chd, level+1)
+    return content
