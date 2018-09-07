@@ -1,7 +1,7 @@
 {
     "original_data_path":"/data/dataset/original/",
     "processed_data_path":"/data/dataset/processed/",
-    "data_file_name":"/data/dataset/processed/Las_Vegas_user_business.json",
+    "data_file_name":"/data/dataset/processed/user_business.json",
     "cate_file_name":"/data/dataset/processed/category/aliasToParents.csv",
     "business_file_name": "/data/dataset/processed/business.json",
     "insert_cost": 1,

@@ -53,11 +53,11 @@ def covertree_clustering(dct, k):
         nearest_center = None
         min_dist = float('inf')
         for c in centers:
-            dist_c_n = dist(c,n)
+            dist_c_n = dist(c.val,n.val)
             if dist_c_n < min_dist:
                 min_dist = dist_c_n
                 nearest_center = c
 
         result_set[nearest_center] += [ n.val for i in xrange(len(n.same_val_set)+1) ]
-    
+
     return result_set.values()

@@ -86,7 +86,8 @@ class DataLoader:
             is a dict {business_1: [[path_1],[path_2],...], ...} and
             kwargs is a list of other helpful parameters.
             Return of the fucntion is a data node
-            @kwargs: a dict of other parameters to deliver to convert_func
+            @kwargs: a dict of other parameters to deliver to convert_func 
+            and some other parameters
 
             #return: a list of data node
         '''
@@ -97,7 +98,11 @@ class DataLoader:
             user_data = json.load(user_data_f)
         
         ret_data = []
+        valid_uid = kwargs['valid_uid'] if kwargs.has_key('valid_uid') else None
+
         for uid in user_data.keys():
+            if valid_uid is not None and uid not in valid_uid:
+                continue 
             bus_dict = {}
             for bid in user_data[uid]:
                 bus_dict[bid] = self.get_business_cate_path(bid)
