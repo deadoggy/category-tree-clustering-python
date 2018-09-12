@@ -5,6 +5,7 @@ sys.path.append(sys.path[0] + '/../')
 from covertree.covertree import CoverTree
 from covertree.node import Node
 from density_covertree import DensityCoverTree
+import numpy as np
 
 def covertree_clustering(dct, k):
     '''
@@ -49,15 +50,17 @@ def covertree_clustering(dct, k):
     # 2. assign all nodes to their nearest node
     dist = dct.dist_calculator
     centers = result_set.keys()
+    labels = np.array([-1 for i in xrange(dct.size)])
     for n in dct.level_stack[-1]:
-        nearest_center = None
+        clus = -1
         min_dist = float('inf')
-        for c in centers:
+        for i, c in enumerate(centers):
             dist_c_n = dist(c.val,n.val)
             if dist_c_n < min_dist:
                 min_dist = dist_c_n
-                nearest_center = c
+                clus = i
+        labels[n.index] = clus
+        for sn in n.same_val_set:
+            labels[sn] = sn.index
 
-        result_set[nearest_center] += [ n.val for i in xrange(len(n.same_val_set)+1) ]
-
-    return result_set.values()
+    return labels

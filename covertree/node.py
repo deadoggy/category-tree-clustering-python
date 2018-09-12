@@ -3,7 +3,7 @@
 class Node:
     
     def __init__(self, val=None, parent=None, dist_to_prt=None,
-                des_sum=0, level=0, children_set=None, same_val_set=None):
+                des_sum=0, level=0, children_set=None, same_val_set=None, index=-1):
         '''
             init function
             
@@ -14,6 +14,7 @@ class Node:
             @level: node's level in covertee
             @children_set: set of children of this node
             @same_val_set: nodes which share a same value with this node
+            @index: index of the node
         '''
         self.val = val
         self.parent = parent
@@ -23,9 +24,7 @@ class Node:
         self.children_set = children_set if children_set is not None else []
         self.same_val_set = same_val_set if same_val_set is not None else []
         self.self_chd = None
-
-        #test index
-        self.index = -1
+        self.index = index
     
     def generate_chd(self, add_self_chd=False, no=None):
         '''
@@ -39,10 +38,7 @@ class Node:
         dist_to_prt=0.0, 
         des_sum=len(self.same_val_set),
         level=self.level-1, children_set=[], 
-        same_val_set=self.same_val_set)
-
-        #test index
-        chd.index = self.index + 345
+        same_val_set=self.same_val_set, index=self.index)
 
         if add_self_chd:
             self.self_chd = chd

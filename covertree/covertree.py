@@ -22,6 +22,7 @@ class CoverTree:
         self.level_stack = []
         self.top_level = top_level
         self.root_node = None
+        self.size = 0
 
     def insert(self, node):
         '''
@@ -33,7 +34,8 @@ class CoverTree:
         '''
 
         set = self.level_stack[0] if 0 != len(self.level_stack) else []
-        self._insert(node, set,  self.top_level)
+        if self._insert(node, set,  self.top_level):
+            self.size += 1
         
     def _insert(self, node, cover_set, level):
         '''

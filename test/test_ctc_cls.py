@@ -21,8 +21,8 @@ class ClusteringTest(unittest.TestCase):
         pivots = generate_category_tree(self.data_loader)
         data = self.data_loader.load(vectorized_convertor, pivots=pivots, sigma=0.0001, valid_uid=self.valid_uid)
         dct = DensityCoverTree(vectorized_dist_calculator, 3)
-        for d in data:
-            dct.insert(Node(val=d))
+        for i, d in enumerate(data):
+            dct.insert(Node(val=d, index=i))
         
         for cls in covertree_clustering(dct, 4):
             assert len(cls) == 250
