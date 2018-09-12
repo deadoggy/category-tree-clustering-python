@@ -109,7 +109,6 @@ class CateTree:
             
             if found:
                 sum_similarity += similarity
-        
     
         return sum_similarity
 

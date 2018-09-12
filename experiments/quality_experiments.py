@@ -141,4 +141,15 @@ def index(data, label, index_name):
 
         return: float
     '''
-    pass
+    if index_name not in ['sc', 'mae', 'rand']:
+        raise Exception('%s not supported'%index_name)
+    
+    # mae
+    # here we do not calculate centers but calculate mean dist between each pair of datanodes
+    # in a cluster
+    if index_name == 'mae':
+        #TODO:
+        pass
+
+    
+
