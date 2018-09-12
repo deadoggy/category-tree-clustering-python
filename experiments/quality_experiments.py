@@ -7,6 +7,7 @@ from data_loader.data_loader import DataLoader
 from dist.bottom_up_edit_dist import *
 from dist.vectorized_user_cate_dist import *
 from ctc.density_covertree import *
+from ctc.covertree_clustering import *
 import time
 import logging
 import numpy as np
@@ -114,10 +115,30 @@ def experiments(alg, dist, data_size, **kwargs):
         labels = spectral_clustering(affinity=X, n_clusters=k)
     
     #hierarchical
+    if alg == 'hierarchical':
+        labels = AgglomerativeClustering(n_clusters=k, affinity='precomputed', linkage='average').fit_predict(X)
     
+    #covertree
+    if alg == 'covertree':
+        calculator = vectorized_dist_calculator if dist=='vec' else bottomup_edit_dist_calculator
+        pivots = generate_category_tree(data_loader)
+        dct = DensityCoverTree(calculator, 3)
+        for i, d in enumerate(data):
+            dct.insert(Node(val=d, index=i))
+        labels = covertree_clustering(dct, k)
 
     #end
     end_time = time.time()
     return (data, labels, end_time-start_time)
 
+def index(data, label, index_name):
+    '''
+        index to evaluate the experiment result
 
+        @data: list, all data
+        @label: ndarray, shape(len(data),)
+        @index_name: index to evaluate results, in ['sc', 'mae', 'rand']
+
+        return: float
+    '''
+    pass
