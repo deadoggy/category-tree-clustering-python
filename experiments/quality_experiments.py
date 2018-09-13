@@ -11,14 +11,7 @@ from ctc.covertree_clustering import *
 import time
 import logging
 import numpy as np
-
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    filename='/log/ctclog/%s_exp.log'%time.strftime("%Y-%m-%d", time.localtime()),
-    filemode='w')
+from sklearn.metrics import silhouette_score, adjusted_rand_score
 
 def _data_format(data, precomputed=False, dist_func=None):
     '''
@@ -49,15 +42,12 @@ def _data_format(data, precomputed=False, dist_func=None):
     
     return dist_matrix
 
-
-def experiments(alg, dist, data_size, **kwargs):
+def algorithm_runner(alg, dist, **kwargs):
     '''
-        run experiments
+        run algorithms
 
         @alg: string, which clustering algorithm to use, in ['covertree', 'hierarichical', 'dbscan', 'kmeans', 'spectral']
         @dist: string, which distance to use, in ['vec', 'edit']
-        @data_size: integer, size of experiments data
-    
     '''
 
     if alg not in ['covertree', 'hierarichical', 'dbscan', 'kmeans', 'spectral']:
@@ -131,25 +121,86 @@ def experiments(alg, dist, data_size, **kwargs):
     end_time = time.time()
     return (data, labels, end_time-start_time)
 
-def index(data, label, index_name):
+def index(data, y_predict, index_name, dist_name, y_truth = None):
     '''
         index to evaluate the experiment result
 
         @data: list, all data
-        @label: ndarray, shape(len(data),)
+        @y_predict: ndarray, shape(len(data),), predicted value
         @index_name: index to evaluate results, in ['sc', 'mae', 'rand']
-
+        @dist_name: name of dist, in ['vec', 'edit']
+        @y_truth: ndarray, shape(len(data),), truth
         return: float
     '''
     if index_name not in ['sc', 'mae', 'rand']:
         raise Exception('%s not supported'%index_name)
-    
+    if dist_name not in ['vec', 'edit']:
+        raise Exception('%s not supported'%dist_name)
+
+    if 'vec' == dist_name:
+        dist = vectorized_dist_calculator
+    else:
+        dist = bottomup_edit_dist_calculator
+    k = len(set(y_predict) - 1 if -1 in y_predict else 0)
     # mae
     # here we do not calculate centers but calculate mean dist between each pair of datanodes
-    # in a cluster
+    # within a cluster
     if index_name == 'mae':
-        #TODO:
-        pass
+        clusters = [ [] for i in xrange(k) ]
+        for i, cls_i in enumerate(y_predict):
+            if -1 != cls_i:
+                clusters[cls_i].append(data[i])
+        mae = 0.0
+        for clus in clusters:
+            cls_mae = 0.0
+            for i in xrange(len(clus)):
+                for j in xrange(len(clus)):
+                    cls_mae += dist(clus[i], clus[j])
+            mae += cls_mae / len(clus)
+        return mae
+    elif index_name == 'sc':
+        X = _data_format(data, precomputed=True, dist_func=dist)
+        return silhouette_score(X, y_predict, metric='precomputed')
+    else:
+        if y_truth is None:
+            raise Exception('rand index requires y_truth')
+        return adjusted_rand_score(y_truth, y_predict)
 
+def experiments(dataset_name):
+    '''
+        run experiments, evaluate index of results and generate log
+
+        @dataset_name: in ['testdata1000', 'randomdata1000']
+    '''
+
+    logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    filename='/log/ctclog/%s_%s_exp.log'%(time.strftime("%Y-%m-%d", time.localtime()),dataset_name),
+    filemode='w')
+
+    algs = ['covertree', 'hierarchical', 'kmeans', 'spectral']
+    dists = ['vec', 'edit']
+    indexs = ['sc', 'mae', 'rand']
+    with open(dataset_name,'r') as valid_uid_f:
+            valid_uid = valid_uid_f.read().split('\n')
+
+    y_truth = None
+    if dataset_name == 'testdata1000':
+        with open('testtruth','r') as truth_f:
+            y_truth = truth_f.read().split('\n')
+        for i in xrange(len(y_truth)):
+            y_truth[i] = int(y_truth[i])
     
-
+    for alg in algs:
+        for dist in dists:
+            data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid)
+            log_content = 'dataset:%s; alg:%s; distance_type:%s; ' % (alg,dist,dataset_name)
+            for idx in indexs:
+                index_val = index(data, labels, idx, dist, y_truth)
+                log_content += '%s:%s; '%(idx, str(index_val))
+            logging.info(log_content)
+        
+            
+    
