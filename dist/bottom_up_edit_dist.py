@@ -133,6 +133,7 @@ def __compact(t1, t2, graph, k):
                 v_chd_eq_cls = []
                 for n in v.chd_set:
                     v_chd_eq_cls.append(k[n])
+
                 #sorted by index of __GraphNode and compare them
                 srted_w_chd_eq_cls = sorted(w_chd_eq_cls, cmp=lambda x,y:cmp(x.index, y.index))
                 srted_v_chd_eq_cls = sorted(v_chd_eq_cls, cmp=lambda x,y:cmp(x.index, y.index))
@@ -216,9 +217,11 @@ def __mapping(t1, t2, graph, k, m12, m21):
                 m12[n_v_queue] = n_w_queue
                 m21[n_w_queue] = n_v_queue
                 #sort chd_set to ensure responsing
-                srted_nw_chd = sorted(n_w_queue.chd_set, cmp=lambda x,y:cmp(x.label, y.label))
-                srted_nv_chd = sorted(n_v_queue.chd_set, cmp=lambda x,y:cmp(x.label, y.label))
+                srted_nw_chd = sorted(n_w_queue.chd_set, cmp=lambda x,y:cmp(k[x].label, k[y].label))
+                srted_nv_chd = sorted(n_v_queue.chd_set, cmp=lambda x,y:cmp(k[x].label, k[y].label))
                 for i in xrange(len(srted_nw_chd)):
+                    if len(srted_nv_chd) != len(srted_nw_chd):
+                        print 'stub'
                     w_queue.put(srted_nw_chd[i])
                     v_queue.put(srted_nv_chd[i])
 

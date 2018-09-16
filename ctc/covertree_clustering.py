@@ -61,6 +61,6 @@ def covertree_clustering(dct, k):
                 clus = i
         labels[n.index] = clus
         for sn in n.same_val_set:
-            labels[sn] = sn.index
+            labels[sn.index] = clus
 
     return labels

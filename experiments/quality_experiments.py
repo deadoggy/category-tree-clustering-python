@@ -141,7 +141,7 @@ def index(data, y_predict, index_name, dist_name, y_truth = None):
         dist = vectorized_dist_calculator
     else:
         dist = bottomup_edit_dist_calculator
-    k = len(set(y_predict) - 1 if -1 in y_predict else 0)
+    k = len(set(y_predict)) - (1 if -1 in y_predict else 0)
     # mae
     # here we do not calculate centers but calculate mean dist between each pair of datanodes
     # within a cluster
@@ -166,7 +166,7 @@ def index(data, y_predict, index_name, dist_name, y_truth = None):
             raise Exception('rand index requires y_truth')
         return adjusted_rand_score(y_truth, y_predict)
 
-def experiments(dataset_name):
+def experiments(dataset_name, k):
     '''
         run experiments, evaluate index of results and generate log
 
@@ -181,7 +181,7 @@ def experiments(dataset_name):
     filemode='w')
 
     algs = ['covertree', 'hierarchical', 'kmeans', 'spectral']
-    dists = ['vec', 'edit']
+    dists = ['edit']
     indexs = ['sc', 'mae', 'rand']
     with open(dataset_name,'r') as valid_uid_f:
             valid_uid = valid_uid_f.read().split('\n')
@@ -195,12 +195,12 @@ def experiments(dataset_name):
     
     for alg in algs:
         for dist in dists:
-            data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid)
-            log_content = 'dataset:%s; alg:%s; distance_type:%s; ' % (alg,dist,dataset_name)
+            data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid, sigma=0.0001, k=k)
+            log_content = 'k:%s; dataset:%s; alg:%s; distance_type:%s; ' % (k, alg,dist,dataset_name)
             for idx in indexs:
                 index_val = index(data, labels, idx, dist, y_truth)
                 log_content += '%s:%s; '%(idx, str(index_val))
             logging.info(log_content)
         
-            
     
+experiments('testdata1000', 4)
