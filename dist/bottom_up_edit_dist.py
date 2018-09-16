@@ -48,6 +48,9 @@ class BUEditTree:
             for chd in p.chd_set:
                 if label!=label_list[-1] and label==chd.label:
                     next_p = chd
+                    # remove duplicated leaves nodes
+                    if next_p in self.leaves_set:
+                        self.leaves_set.remove(next_p)
                     break
             if next_p is None:
                 next_p = BUEditTreeNode(label, -1, p)
