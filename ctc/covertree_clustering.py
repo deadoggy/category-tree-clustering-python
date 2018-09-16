@@ -51,6 +51,7 @@ def covertree_clustering(dct, k):
     dist = dct.dist_calculator
     centers = result_set.keys()
     labels = np.array([-1 for i in xrange(dct.size)])
+    print 'dct.size: %s' % dct.size
     for n in dct.level_stack[-1]:
         clus = -1
         min_dist = float('inf')

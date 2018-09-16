@@ -112,7 +112,7 @@ def algorithm_runner(alg, dist, **kwargs):
     if alg == 'covertree':
         calculator = vectorized_dist_calculator if dist=='vec' else bottomup_edit_dist_calculator
         pivots = generate_category_tree(data_loader)
-        dct = DensityCoverTree(calculator, 3)
+        dct = DensityCoverTree(calculator, 5)
         for i, d in enumerate(data):
             dct.insert(Node(val=d, index=i))
         labels = covertree_clustering(dct, k)
