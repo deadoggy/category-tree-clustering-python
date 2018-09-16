@@ -50,7 +50,7 @@ def algorithm_runner(alg, dist, **kwargs):
         @dist: string, which distance to use, in ['vec', 'edit']
     '''
 
-    if alg not in ['covertree', 'hierarichical', 'dbscan', 'kmeans', 'spectral']:
+    if alg not in ['covertree', 'hierarchical', 'dbscan', 'kmeans', 'spectral']:
         raise Exception('alg in experiments not valid')
     
     if dist not in ['vec', 'edit']:
@@ -195,6 +195,8 @@ def experiments(dataset_name, k):
     
     for alg in algs:
         for dist in dists:
+            if alg=='kmeans' and dist=='edit':
+                continue
             data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid, sigma=0.0001, k=k)
             log_content = 'k:%s; dataset:%s; alg:%s; distance_type:%s; ' % (k, alg,dist,dataset_name)
             for idx in indexs:
