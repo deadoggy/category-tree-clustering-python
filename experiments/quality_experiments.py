@@ -13,6 +13,8 @@ import logging
 import numpy as np
 from sklearn.metrics import silhouette_score, adjusted_rand_score
 
+data_loader = DataLoader()
+
 def _data_format(data, precomputed=False, dist_func=None, kernal=lambda x:x):
     '''
         format data to numpy
@@ -61,7 +63,7 @@ def rbf(dist):
 
 def algorithm_runner(alg, dist, **kwargs):
     '''
-        run algorithms
+        run algorithms; running time includes loading and converting data into acceptable format
 
         @alg: string, which clustering algorithm to use, in ['covertree', 'hierarichical', 'dbscan', 'kmeans', 'spectral']
         @dist: string, which distance to use, in ['vec', 'edit']
@@ -76,7 +78,6 @@ def algorithm_runner(alg, dist, **kwargs):
     #start
     start_time = time.time()
 
-    data_loader = DataLoader()
     #valid uid
     valid_uid = None if not kwargs.has_key('valid_uid') else kwargs['valid_uid']
     if type(valid_uid) != list:
@@ -201,6 +202,13 @@ def experiments(dataset_name, k):
     datefmt='%Y-%m-%d %H:%M:%S',
     filename='/log/ctclog/%s_%s_exp.log'%(time.strftime("%Y-%m-%d", time.localtime()),dataset_name),
     filemode='w')
+
+    #logging to terminal
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
 
     algs = ['covertree', 'hierarchical', 'kmeans', 'spectral'] #spectral todo
     dists = ['vec', 'edit']
