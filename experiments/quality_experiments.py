@@ -13,13 +13,12 @@ import logging
 import numpy as np
 from sklearn.metrics import silhouette_score, adjusted_rand_score
 
-def _data_format(data, precomputed=False, dist_func=None):
+def _data_format(data, precomputed=False, dist_func=None, kernal=None):
     '''
         format data to numpy
 
         @data: list, each element is a data point
         @precomputed: boolean, False:not precomputed; True:precomputed
-        
         #return: if precomputed => a square matrix; else => feature vec ndarray
     '''
     if not precomputed:
@@ -180,7 +179,7 @@ def experiments(dataset_name, k):
     filename='/log/ctclog/%s_%s_exp.log'%(time.strftime("%Y-%m-%d", time.localtime()),dataset_name),
     filemode='w')
 
-    algs = ['covertree', 'hierarchical', 'kmeans', 'spectral']
+    algs = ['covertree', 'hierarchical', 'kmeans'] #spectral todo
     dists = ['edit']
     indexs = ['sc', 'mae', 'rand']
     with open(dataset_name,'r') as valid_uid_f:
