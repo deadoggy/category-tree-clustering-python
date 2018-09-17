@@ -13,12 +13,14 @@ import logging
 import numpy as np
 from sklearn.metrics import silhouette_score, adjusted_rand_score
 
-def _data_format(data, precomputed=False, dist_func=None, kernal=None):
+def _data_format(data, precomputed=False, dist_func=None, kernal=lambda x:x):
     '''
         format data to numpy
 
         @data: list, each element is a data point
         @precomputed: boolean, False:not precomputed; True:precomputed
+        @kernal: callable, kernal function
+
         #return: if precomputed => a square matrix; else => feature vec ndarray
     '''
     if not precomputed:
@@ -26,6 +28,10 @@ def _data_format(data, precomputed=False, dist_func=None, kernal=None):
     
     if dist_func is None or not callable(dist_func):
         raise Exception('a callable distance function is required')
+
+    if kernal is not None and not callable(kernal):
+        raise Exception('kernal must be callable')
+    
 
     dist_matrix = np.array(
         [
@@ -35,11 +41,23 @@ def _data_format(data, precomputed=False, dist_func=None, kernal=None):
     for i in xrange(len(data)):
         for j in xrange(i, len(data)):
             if i==j:
-                dist_matrix[i,j] = 0.0
+                dist_matrix[i,j] = kernal(0.0)
             else:
-                dist_matrix[i,j] = dist_func(data[i], data[j])
+                dist_matrix[i,j] = kernal(dist_func(data[i], data[j]))
     
     return dist_matrix
+
+def rbf(dist):
+    '''
+        Gaussian rbf kernal function
+        formula: np.exp(- (d(X,X)**2)/(2 * sigma**2 ))
+
+        @dist: float
+    '''
+    #parameter modified here#
+    sigma = 1.0
+
+    return np.exp(-(dist**2)/(2*(sigma**2)))
 
 def algorithm_runner(alg, dist, **kwargs):
     '''
@@ -64,6 +82,7 @@ def algorithm_runner(alg, dist, **kwargs):
     if type(valid_uid) != list:
         raise Exception('valid_uid must be a list')
 
+
     #load data based on dist type
     if dist == 'vec':
         if not kwargs.has_key('sigma'):
@@ -76,7 +95,11 @@ def algorithm_runner(alg, dist, **kwargs):
     else:
         data = data_loader.load(bottomup_edit_dist_converter, valid_uid=valid_uid)
         metric = 'precomputed' 
-        X = _data_format(data, True, bottomup_edit_dist_calculator)
+        if alg == 'spectral':
+            kernal = rbf
+        else:
+            kernal = lambda x:x
+        X = _data_format(data, True, bottomup_edit_dist_calculator, kernal=kernal)
     
     #dbscan
     if alg == 'dbscan':
@@ -179,8 +202,8 @@ def experiments(dataset_name, k):
     filename='/log/ctclog/%s_%s_exp.log'%(time.strftime("%Y-%m-%d", time.localtime()),dataset_name),
     filemode='w')
 
-    algs = ['covertree', 'hierarchical', 'kmeans'] #spectral todo
-    dists = ['edit']
+    algs = ['covertree', 'hierarchical', 'kmeans', 'spectral'] #spectral todo
+    dists = ['vec', 'edit']
     indexs = ['sc', 'mae', 'rand']
     with open(dataset_name,'r') as valid_uid_f:
             valid_uid = valid_uid_f.read().split('\n')
@@ -203,5 +226,9 @@ def experiments(dataset_name, k):
                 log_content += '%s:%s; '%(idx, str(index_val))
             logging.info(log_content)
         
-    
-experiments('testdata1000', 4)
+
+dataset_list = ['testdata1000','randomdata1000']
+
+for dataset in dataset_list:
+    for k in xrange(2, 20):
+        experiments(dataset, k)
