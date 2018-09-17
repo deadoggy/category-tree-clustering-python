@@ -228,10 +228,17 @@ def experiments(dataset_name, k):
             if alg=='kmeans' and dist=='edit':
                 continue
             data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid, sigma=0.0001, k=k)
-            log_content = 'k:%s; dataset:%s; alg:%s; distance_type:%s; ' % (k, alg,dist,dataset_name)
+            log_content = 'k:%s; dataset:%s; alg:%s; distance_type:%s; runtime:%d; ' % (k, alg,dist,dataset_name, run_time)
+            #index
             for idx in indexs:
                 index_val = index(data, labels, idx, dist, y_truth)
                 log_content += '%s:%s; '%(idx, str(index_val))
+            #size of clusters
+            log_content += 'size: [ '
+            for c in set(labels):
+                log_content += '%d '%labels.count(c)
+            log_content += ']'
+
             logging.info(log_content)
         
 
