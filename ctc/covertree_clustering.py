@@ -14,7 +14,7 @@ def covertree_clustering(dct, k):
         @dct: a density cover tree
         @k: number of clusters
 
-        #return: [[node_1, node_2, ...], [...], ..., [...]]
+        #return: [label_1, label_2, ...]
     '''
 
     #check dct and k
@@ -41,10 +41,14 @@ def covertree_clustering(dct, k):
     result_set = {}
     k_size = 0
     for density in sorted_densities:
+        quit_loop = False
         for center in candidate_centers[density]:
             result_set[center] = []
-        k_size += len(candidate_centers[density])
-        if k_size >= k:
+            k_size += 1
+            if k_size >= k:
+                quit_loop = True
+                break
+        if quit_loop:
             break
     
     # 2. assign all nodes to their nearest node

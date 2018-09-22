@@ -12,8 +12,10 @@ import time
 import logging
 import numpy as np
 from sklearn.metrics import silhouette_score, adjusted_rand_score
+from config.load_config import Config
 
 data_loader = DataLoader()
+config = Config().config
 
 def _data_format(data, precomputed=False, dist_func=None, kernal=lambda x:x):
     '''
@@ -57,7 +59,7 @@ def rbf(dist):
         @dist: float
     '''
     #parameter modified here#
-    sigma = 1.0
+    sigma = config['rbf_sigma']
 
     return np.exp(-(dist**2)/(2*(sigma**2)))
 
@@ -135,7 +137,9 @@ def algorithm_runner(alg, dist, **kwargs):
     if alg == 'covertree':
         calculator = vectorized_dist_calculator if dist=='vec' else bottomup_edit_dist_calculator
         pivots = generate_category_tree(data_loader)
-        dct = DensityCoverTree(calculator, 5)
+
+        top_level = (config['edit_top_level'] if dist=='edit' else config['vec_top_level']) 
+        dct = DensityCoverTree(calculator, top_level)
         for i, d in enumerate(data):
             dct.insert(Node(val=d, index=i))
         labels = covertree_clustering(dct, k)
@@ -236,7 +240,7 @@ def experiments(dataset_name, k):
             #size of clusters
             log_content += 'size: [ '
             for c in set(labels):
-                log_content += '%d '%labels.count(c)
+                log_content += '%d '%labels.tolist().count(c)
             log_content += ']'
 
             logging.info(log_content)
