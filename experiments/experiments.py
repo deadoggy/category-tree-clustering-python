@@ -104,8 +104,7 @@ def algorithm_runner(alg, dist, **kwargs):
         else:
             kernal = lambda x:x
         X = _data_format(data, True, bottomup_edit_dist_calculator, kernal=kernal)
-    load_time = time.time()
-    print "load:%d"%(load_time-start_time)
+        
     #dbscan
     if alg == 'dbscan':
         if (not config.has_key('eps')) or (not config.has_key('min_samples')):
@@ -143,13 +142,10 @@ def algorithm_runner(alg, dist, **kwargs):
         dct = DensityCoverTree(calculator, top_level)
         for i, d in enumerate(data):
             dct.insert(Node(val=d, index=i))
-        ins_time = time.time()
-        print "ins:%d"%(ins_time-load_time)
         labels = covertree_clustering(dct, k)
 
     #end
     end_time = time.time()
-    print "cls:%d"%(end_time-ins_time)
     return (data, labels, end_time-start_time)
 
 def index(data, y_predict, index_name, dist_name, y_truth = None):
@@ -301,6 +297,6 @@ elif sys.argv[1] == 'efficiency':
     for data_size in [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000, 25000, 40000, 80000, 100000, 200000, 250000,300000, 350000, 400000, 450000, 500000, 600000, 800000, 1000000, 1200000]:
         efficiency_experiments(data_size)
 
-#efficiency_experiments(10000)
+# efficiency_experiments(10000)
 
 

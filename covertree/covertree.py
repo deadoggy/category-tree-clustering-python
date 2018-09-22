@@ -144,7 +144,7 @@ class CoverTree:
             raise Exception('set not a list')
         ret_set = []
         for n in set:
-            ret_set += n.children_set
+            ret_set.extend(n.children_set)
             if n.self_chd is None:
                 ret_set.append(n.generate_chd(False))
         return ret_set
