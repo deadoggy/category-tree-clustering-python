@@ -31,7 +31,7 @@ class DensityCoverTree(CoverTree) :
         q_i = self.level_stack[self.top_level - level]
         stack_dep = len(self.level_stack)
     
-        for i in range(level, self.top_level - stack_dep + 1, -1):
+        for i in xrange(level, self.top_level - stack_dep + 1, -1):
             q = self._get_children_set(q_i)
             alpha = self._filter(node, q, -inf, 2**level-2**(i+1))
             
@@ -63,7 +63,12 @@ class DensityCoverTree(CoverTree) :
         def condition(n):
             dist = self.dist_calculator(node.val, n.val)
             return n not in q_i and dist <= 2**l
-        return filter(condition, q)
+        # return filter(condition, q)
+        ret_list = []
+        for n in q:
+            if condition(n):
+                ret_list.append(n)
+        return ret_list
 
     def _amount_and_self_chds(self, node_set):
         '''

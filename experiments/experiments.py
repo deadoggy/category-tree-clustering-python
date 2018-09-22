@@ -82,34 +82,36 @@ def algorithm_runner(alg, dist, **kwargs):
 
     #valid uid
     valid_uid = None if not kwargs.has_key('valid_uid') else kwargs['valid_uid']
-    if type(valid_uid) != list:
+    if valid_uid != None and type(valid_uid) != list:
         raise Exception('valid_uid must be a list')
-
+    #data size
+    data_size = float('inf') if not kwargs.has_key('data_size') else kwargs['data_size']
 
     #load data based on dist type
     if dist == 'vec':
-        if not kwargs.has_key('sigma'):
+        if not config.has_key('sigma'):
             raise Exception('sigma is required in vectorized distance')
-        sigma = kwargs['sigma']
+        sigma = config['sigma']
         pivots = generate_category_tree(data_loader)
-        data = data_loader.load(vectorized_convertor, pivots=pivots,sigma=sigma, valid_uid=valid_uid)
+        data = data_loader.load(vectorized_convertor, pivots=pivots,sigma=sigma, valid_uid=valid_uid, data_size = data_size)
         metric = 'euclidean'
         X = _data_format(data, False, vectorized_dist_calculator)
     else:
-        data = data_loader.load(bottomup_edit_dist_converter, valid_uid=valid_uid)
+        data = data_loader.load(bottomup_edit_dist_converter, valid_uid=valid_uid, data_size = data_size)
         metric = 'precomputed' 
         if alg == 'spectral':
             kernal = rbf
         else:
             kernal = lambda x:x
         X = _data_format(data, True, bottomup_edit_dist_calculator, kernal=kernal)
-    
+    load_time = time.time()
+    print "load:%d"%(load_time-start_time)
     #dbscan
     if alg == 'dbscan':
-        if (not kwargs.has_key('eps')) or (not kwargs.has_key('min_samples')):
-            raise Exception('eps and min_samples are required in dbscan')
-        eps = kwargs['eps']
-        min_samples = kwargs['min_samples']
+        if (not config.has_key('eps')) or (not config.has_key('min_samples')):
+            raise Exception("eps and min_samples are required in config")
+        eps = config['eps']
+        min_samples = config['min_samples']
         dbscan = DBSCAN(eps=eps, min_samples=min_samples, metric=metric)
         labels = dbscan.fit_predict(X)
         
@@ -127,25 +129,27 @@ def algorithm_runner(alg, dist, **kwargs):
         
     #spectral
     if alg == 'spectral':
-        labels = spectral_clustering(affinity=X, n_clusters=k)
+        affinity = 'precomputed' if dist=='edit' else 'rbf'
+        labels = SpectralClustering(affinity=affinity, n_clusters=k).fit_predict(X)
     
     #hierarchical
     if alg == 'hierarchical':
-        labels = AgglomerativeClustering(n_clusters=k, affinity='precomputed', linkage='average').fit_predict(X)
+        labels = AgglomerativeClustering(n_clusters=k, affinity=metric, linkage='average').fit_predict(X)
     
     #covertree
     if alg == 'covertree':
         calculator = vectorized_dist_calculator if dist=='vec' else bottomup_edit_dist_calculator
-        pivots = generate_category_tree(data_loader)
-
         top_level = (config['edit_top_level'] if dist=='edit' else config['vec_top_level']) 
         dct = DensityCoverTree(calculator, top_level)
         for i, d in enumerate(data):
             dct.insert(Node(val=d, index=i))
+        ins_time = time.time()
+        print "ins:%d"%(ins_time-load_time)
         labels = covertree_clustering(dct, k)
 
     #end
     end_time = time.time()
+    print "cls:%d"%(end_time-ins_time)
     return (data, labels, end_time-start_time)
 
 def index(data, y_predict, index_name, dist_name, y_truth = None):
@@ -193,9 +197,9 @@ def index(data, y_predict, index_name, dist_name, y_truth = None):
             raise Exception('rand index requires y_truth')
         return adjusted_rand_score(y_truth, y_predict)
 
-def experiments(dataset_name, k):
+def quality_experiments(dataset_name, k):
     '''
-        run experiments, evaluate index of results and generate log
+        run quality experiments, evaluate index of results and generate log
 
         @dataset_name: in ['testdata1000', 'randomdata1000']
     '''
@@ -204,7 +208,7 @@ def experiments(dataset_name, k):
     level=logging.DEBUG,
     format='%(asctime)s %(levelname)s %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
-    filename='/log/ctclog/%s_%s_exp.log'%(time.strftime("%Y-%m-%d", time.localtime()),dataset_name),
+    filename='/log/ctclog/%s_%s_quality_exp.log'%(time.strftime("%Y-%m-%d", time.localtime()),dataset_name),
     filemode='w')
 
     #logging to terminal
@@ -214,7 +218,7 @@ def experiments(dataset_name, k):
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
-    algs = ['covertree', 'hierarchical', 'kmeans', 'spectral'] #spectral todo
+    algs = ['covertree', 'kmeans', 'spectral', 'hierarchical'] #spectral todo
     dists = ['vec', 'edit']
     indexs = ['sc', 'mae', 'rand']
     with open(dataset_name,'r') as valid_uid_f:
@@ -231,8 +235,8 @@ def experiments(dataset_name, k):
         for dist in dists:
             if alg=='kmeans' and dist=='edit':
                 continue
-            data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid, sigma=0.0001, k=k)
-            log_content = 'k:%s; dataset:%s; alg:%s; distance_type:%s; runtime:%d; ' % (k, alg,dist,dataset_name, run_time)
+            data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid, k=k)
+            log_content = 'k:%s; dataset:%s; alg:%s; distance_type:%s; runtime:%d; ' % (k, dataset_name, alg, dist, run_time)
             #index
             for idx in indexs:
                 index_val = index(data, labels, idx, dist, y_truth)
@@ -246,8 +250,57 @@ def experiments(dataset_name, k):
             logging.info(log_content)
         
 
-dataset_list = ['testdata1000','randomdata1000']
+def efficiency_experiments(data_size):
+    '''
+        run efficiency experiments, evaluate index of results and generate log
 
-for dataset in dataset_list:
-    for k in xrange(2, 20):
-        experiments(dataset, k)
+        @dataset_size: number
+    '''
+    logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    filename='/log/ctclog/%s_effi_exp.log'%(time.strftime("%Y-%m-%d", time.localtime())),
+    filemode='w')
+
+    #logging to terminal
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
+    algs = ['covertree']
+    dists = ['vec']
+
+    for alg in algs:
+        for dist in dists:
+            if alg=='kmeans' and (dist=='edit' or data_size > 25000):
+                continue
+            if alg=='spectral' and data_size > 5000:
+                continue
+            if alg=='hierarchical' and data_size > 50000000:
+                continue
+            if alg=='kmeans' and data_size > 25000:
+                continue
+            if alg=='dbscan' and data_size > 25000:
+                continue
+            data, labels, run_time = algorithm_runner(alg, dist, data_size=data_size, k=20)
+            log_content = 'k:%s; data_size:%d; alg:%s; distance_type:%s; runtime:%d; ' % (20, data_size, alg, dist, run_time)
+
+            logging.info(log_content)
+
+
+if len(sys.argv) == 1:
+    raise Exception('which experiments?')
+elif sys.argv[1] == 'quality':
+    for dataset in ['testdata1000','randomdata1000']:
+        for k in xrange(2, 20):
+            quality_experiments(dataset, k)
+elif sys.argv[1] == 'efficiency':
+    for data_size in [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000, 25000, 40000, 80000, 100000, 200000, 250000,300000, 350000, 400000, 450000, 500000, 600000, 800000, 1000000, 1200000]:
+        efficiency_experiments(data_size)
+
+#efficiency_experiments(10000)
+
+

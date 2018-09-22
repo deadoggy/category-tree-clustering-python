@@ -7,7 +7,10 @@
     "insert_cost": 1,
     "delete_cost": 1,
     "substitution": 1,
+    "sigma": 0.0001,
     "rbf_sigma": 1.0,
     "edit_top_level": 5,
-    "vec_top_level": 3
+    "vec_top_level": 3,
+    "eps": 0.0001,
+    "min_samples": 20
 }

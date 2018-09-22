@@ -35,13 +35,15 @@ def covertree_clustering(dct, k):
                     candidate_centers[density_n] = []
                 candidate_centers[density_n].append(n)
             break
-    sorted_densities = sorted(candidate_centers.keys(), reverse = True)
+    sorted_densities = np.sort(candidate_centers.keys())
     
     # 1.2 find first k centers with biggest density
     result_set = {}
     k_size = 0
-    for density in sorted_densities:
+    for density_i in xrange(len(sorted_densities)-1, -1, -1):
+        density = sorted_densities[density_i]
         quit_loop = False
+
         for center in candidate_centers[density]:
             result_set[center] = []
             k_size += 1

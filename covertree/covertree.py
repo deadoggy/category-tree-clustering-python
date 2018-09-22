@@ -165,7 +165,12 @@ class CoverTree:
         if type(node_set) != list:
             raise Exception('set not a list')
         d = self.dist_calculator
-        return filter(lambda x: d(x.val, center_node.val)>=low_bound and d(x.val, center_node.val) <= high_bound, node_set)
+        ret_list = []
+        for n in node_set:
+            if d(n.val, center_node.val)>=low_bound and d(n.val, center_node.val) <= high_bound:
+                ret_list.append(n)
+        return ret_list
+
 
     def _update_des_sum(self, node):
         '''
@@ -202,7 +207,7 @@ class CoverTree:
         
         #update to the lowest level
         parent = node
-        for i in range(current_level-1, self.top_level-len(self.level_stack), -1):
+        for i in xrange(current_level-1, self.top_level-len(self.level_stack), -1):
             son = parent.generate_chd(True)
             self.level_stack[self.top_level-i].append(son)
             parent = son

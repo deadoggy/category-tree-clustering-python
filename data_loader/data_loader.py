@@ -99,8 +99,12 @@ class DataLoader:
         
         ret_data = []
         valid_uid = kwargs['valid_uid'] if kwargs.has_key('valid_uid') else None
+        data_size = kwargs['data_size'] if kwargs.has_key('data_size') else float('inf')
 
-        for uid in user_data.keys():
+
+        for count, uid in enumerate(user_data.keys()):
+            if count+1 > data_size:
+                break
             if valid_uid is not None and uid not in valid_uid:
                 continue 
             bus_dict = {}
