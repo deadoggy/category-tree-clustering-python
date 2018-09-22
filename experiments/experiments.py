@@ -104,7 +104,7 @@ def algorithm_runner(alg, dist, **kwargs):
         else:
             kernal = lambda x:x
         X = _data_format(data, True, bottomup_edit_dist_calculator, kernal=kernal)
-        
+
     #dbscan
     if alg == 'dbscan':
         if (not config.has_key('eps')) or (not config.has_key('min_samples')):
@@ -202,8 +202,8 @@ def quality_experiments(dataset_name, k):
 
     logging.basicConfig(
     level=logging.DEBUG,
-    format='%(asctime)s %(levelname)s %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
+    format='[%(asctime)s] [%(levelname)s] %(message)s',
+    datefmt='[%Y-%m-%d %H:%M:%S]',
     filename='/log/ctclog/%s_%s_quality_exp.log'%(time.strftime("%Y-%m-%d", time.localtime()),dataset_name),
     filemode='w')
 
@@ -254,7 +254,7 @@ def efficiency_experiments(data_size):
     '''
     logging.basicConfig(
     level=logging.DEBUG,
-    format='%(asctime)s %(levelname)s %(message)s',
+    format='[%(asctime)s] [%(levelname)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
     filename='/log/ctclog/%s_effi_exp.log'%(time.strftime("%Y-%m-%d", time.localtime())),
     filemode='w')
