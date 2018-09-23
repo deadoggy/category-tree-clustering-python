@@ -17,6 +17,20 @@ from config.load_config import Config
 data_loader = DataLoader()
 config = Config().config
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='[%(asctime)s] [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    filename='/log/ctclog/%s_effi_exp.log'%(time.strftime("%Y-%m-%d", time.localtime())),
+    filemode='w')
+
+#logging to terminal
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
+
 def _data_format(data, precomputed=False, dist_func=None, kernal=lambda x:x):
     '''
         format data to numpy
@@ -200,20 +214,6 @@ def quality_experiments(dataset_name, k, algs=None, dists=None):
         @dataset_name: in ['testdata1000', 'randomdata1000']
     '''
 
-    logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] [%(levelname)s] %(message)s',
-    datefmt='[%Y-%m-%d %H:%M:%S]',
-    filename='/log/ctclog/%s_%s_quality_exp.log'%(time.strftime("%Y-%m-%d", time.localtime()),dataset_name),
-    filemode='w')
-
-    #logging to terminal
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
-
     algs = ['covertree', 'kmeans', 'spectral', 'hierarchical'] if algs is None else algs
     dists = ['vec', 'edit'] if dists is None else dists
     indexs = ['sc', 'mae', 'rand']
@@ -252,19 +252,6 @@ def efficiency_experiments(data_size, algs=None, dists=None):
 
         @dataset_size: number
     '''
-    logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    filename='/log/ctclog/%s_effi_exp.log'%(time.strftime("%Y-%m-%d", time.localtime())),
-    filemode='w')
-
-    #logging to terminal
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    console.setFormatter(formatter)
-    logging.getLogger('').addHandler(console)
 
     algs = ['covertree', 'kmeans', 'spectral', 'hierarchical'] if algs is None else algs
     dists = ['vec', 'edit'] if dists is None else dists
@@ -286,6 +273,5 @@ elif sys.argv[1] == 'quality':
 elif sys.argv[1] == 'efficiency':
     for data_size in [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000, 25000, 40000, 80000, 100000, 200000, 250000,300000, 350000, 400000, 450000, 500000, 600000, 800000, 1000000, 1200000]:
         efficiency_experiments(data_size, algs=['hierarchical', 'spectral', 'kmeans', 'dbscan'], dists=['vec'])
-
 
 
