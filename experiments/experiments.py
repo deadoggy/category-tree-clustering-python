@@ -214,7 +214,7 @@ def index(data, y_predict, index_name, dist_name, y_truth = None):
         X = _data_format(data, precomputed=True, dist_func=dist)
         return silhouette_score(X, y_predict, metric='precomputed')
     else:
-        if y_truth is None:
+        if y_truth is None and y_truth is not None:
             raise Exception('rand index requires y_truth')
         return adjusted_rand_score(y_truth, y_predict)
 
@@ -290,7 +290,7 @@ elif sys.argv[1] == 'quality':
     filemode='w')
     #logging to terminal
     console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
+    console.setLevel(logging.DEBUG)
     formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
@@ -318,7 +318,7 @@ elif sys.argv[1] == 'efficiency':
     filemode='w')
     #logging to terminal
     console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
+    console.setLevel(logging.DEBUG)
     formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s')
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
