@@ -148,13 +148,18 @@ def algorithm_runner(alg, dist, **kwargs):
     if alg == 'kmeans':
         if dist == 'edit':
             raise Exception('edit distance is not supported in kmeans')
-        kmeans = KMeans(n_clusters=k, max_iter=300)
+        kmeans = KMeans(n_clusters=k, max_iter=500)
         labels = kmeans.fit_predict(X)
         
     #spectral
     if alg == 'spectral':
-        affinity = 'precomputed' if dist=='edit' else 'rbf'
-        labels = SpectralClustering(affinity=affinity, n_clusters=k).fit_predict(X)
+        try:
+            affinity = 'precomputed' if dist=='edit' else 'rbf'
+            labels = SpectralClustering(affinity=affinity, n_clusters=k).fit_predict(X)
+        except Exception,e:
+            logging.debug(e.message + " [exception, location: alg:%s; k-%d; dist:%s]"%(alg, k, dist))
+            return (-1, -1, -1)
+        
     
     #hierarchical
     if alg == 'hierarchical':
@@ -193,7 +198,7 @@ def index(data, y_predict, index_name, dist_name, y_truth = None):
         dist = vectorized_dist_calculator
     else:
         dist = bottomup_edit_dist_calculator
-    k = len(set(y_predict)) - (1 if -1 in y_predict else 0)
+    k = max(set(y_predict))+1
     # mae
     # here we do not calculate centers but calculate mean dist between each pair of datanodes
     # within a cluster
@@ -208,13 +213,13 @@ def index(data, y_predict, index_name, dist_name, y_truth = None):
             for i in xrange(len(clus)):
                 for j in xrange(len(clus)):
                     cls_mae += dist(clus[i], clus[j])
-            mae += cls_mae / len(clus)
-        return mae
+            mae += (cls_mae / len(clus)) if len(clus) > 0 else 0.0
+        return mae / len(data)
     elif index_name == 'sc':
         X = _data_format(data, precomputed=True, dist_func=dist)
         return silhouette_score(X, y_predict, metric='precomputed')
     else:
-        if y_truth is None and y_truth is not None:
+        if y_truth is None and y_predictd is not None:
             raise Exception('rand index requires y_truth')
         return adjusted_rand_score(y_truth, y_predict)
 
@@ -225,8 +230,8 @@ def quality_experiments(dataset_name, k, algs=None, dists=None):
         @dataset_name: in ['testdata1000', 'randomdata1000']
     '''
 
-    algs = ['covertree', 'kmeans', 'spectral', 'hierarchical'] if algs is None else algs
-    dists = ['vec', 'edit'] if dists is None else dists
+    algs = [ 'covertree', 'kmeans', 'spectral', 'hierarchical'] if algs is None else algs
+    dists = ['vec','edit'] if dists is None else dists
     indexs = ['sc', 'mae', 'rand']
     with open(dataset_name,'r') as valid_uid_f:
             valid_uid = valid_uid_f.read().split('\n')
@@ -243,9 +248,14 @@ def quality_experiments(dataset_name, k, algs=None, dists=None):
             if alg=='kmeans' and dist=='edit':
                 continue
             data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid, k=k)
+            if -1 == data and labels == -1 and run_time == -1:
+                logging.debug("in dataset:%s"%dataset_name)
+                continue
             log_content = 'k:%s; dataset:%s; alg:%s; distance_type:%s; runtime:%d; ' % (k, dataset_name, alg, dist, run_time)
             #index
             for idx in indexs:
+                if dataset_name=='randomdata1000' and idx=='rand':
+                    continue
                 index_val = index(data, labels, idx, dist, y_truth)
                 log_content += '%s:%s; '%(idx, str(index_val))
             #size of clusters
@@ -286,7 +296,7 @@ elif sys.argv[1] == 'quality':
     level=logging.DEBUG,
     format='[%(asctime)s] [%(levelname)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
-    filename='/log/ctclog/%s_quality_exp.log'%(time.strftime("%Y-%m-%d", time.localtime())),
+    filename='/log/ctclog/%s_%s_quality_exp.log'%(time.strftime("%Y-%m-%d", time.localtime()), sys.argv[2]),
     filemode='w')
     #logging to terminal
     console = logging.StreamHandler()
@@ -296,12 +306,9 @@ elif sys.argv[1] == 'quality':
     logging.getLogger('').addHandler(console)
 
     
-    for dataset in ['testdata1000','randomdata1000']:
+    for dataset in [sys.argv[2]]:
         for k in xrange(2, 23):
-            try:
-                quality_experiments(dataset, k)
-            except Exception, e:
-                logging.debug(e.message + "[quality exception, location: k-%d; dataset-%s;]"%(k, dataset))
+            quality_experiments(dataset, k)
         vec_data = None
         vec_X = None
         edit_data = None
@@ -323,10 +330,8 @@ elif sys.argv[1] == 'efficiency':
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
     for data_size in [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000, 25000, 40000, 80000, 100000, 200000, 250000,300000, 350000, 400000, 450000, 500000, 600000, 800000, 1000000, 1200000]:
-        try:
-            efficiency_experiments(data_size, algs=['hierarchical', 'spectral', 'kmeans', 'dbscan'], dists=['vec'])
-        except Exception, e:
-            logging.debug(e.message + "[efficiency exception, location: k-%d;]"%(k))
+        efficiency_experiments(data_size, algs=['hierarchical', 'spectral', 'kmeans', 'dbscan'], dists=['vec'])
+
         
 
 
