@@ -193,7 +193,7 @@ def index(data, y_predict, index_name, dist_name, y_truth = None):
             raise Exception('rand index requires y_truth')
         return adjusted_rand_score(y_truth, y_predict)
 
-def quality_experiments(dataset_name, k):
+def quality_experiments(dataset_name, k, algs=None, dists=None):
     '''
         run quality experiments, evaluate index of results and generate log
 
@@ -214,8 +214,8 @@ def quality_experiments(dataset_name, k):
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
-    algs = ['covertree', 'kmeans', 'spectral', 'hierarchical'] #spectral todo
-    dists = ['vec', 'edit']
+    algs = ['covertree', 'kmeans', 'spectral', 'hierarchical'] if algs is None else algs
+    dists = ['vec', 'edit'] if dists is None else dists
     indexs = ['sc', 'mae', 'rand']
     with open(dataset_name,'r') as valid_uid_f:
             valid_uid = valid_uid_f.read().split('\n')
@@ -287,16 +287,18 @@ def efficiency_experiments(data_size):
             logging.info(log_content)
 
 
-if len(sys.argv) == 1:
-    raise Exception('which experiments?')
-elif sys.argv[1] == 'quality':
-    for dataset in ['testdata1000','randomdata1000']:
-        for k in xrange(2, 20):
-            quality_experiments(dataset, k)
-elif sys.argv[1] == 'efficiency':
-    for data_size in [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000, 25000, 40000, 80000, 100000, 200000, 250000,300000, 350000, 400000, 450000, 500000, 600000, 800000, 1000000, 1200000]:
-        efficiency_experiments(data_size)
+# if len(sys.argv) == 1:
+#     raise Exception('which experiments?')
+# elif sys.argv[1] == 'quality':
+#     for dataset in ['testdata1000','randomdata1000']:
+#         for k in xrange(2, 20):
+#             quality_experiments(dataset, k)
+# elif sys.argv[1] == 'efficiency':
+#     for data_size in [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000, 25000, 40000, 80000, 100000, 200000, 250000,300000, 350000, 400000, 450000, 500000, 600000, 800000, 1000000, 1200000]:
+#         efficiency_experiments(data_size)
 
 # efficiency_experiments(10000)
+
+quality_experiments('testdata1000', 8, algs=['covertree'], dists=['edit'])
 
 

@@ -20,7 +20,7 @@ def covertree_clustering(dct, k):
     #check dct and k
     if dct.__class__ != DensityCoverTree:
         raise Exception('arg#1 not a  density cover tree')
-    if k<=0 or k>len(dct.level_stack):
+    if k<=0 or k>len(dct.level_stack[-1]):
         raise Exception('invalid k')
 
     # 1. find initial centers
