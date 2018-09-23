@@ -50,6 +50,7 @@ def _data_format(data, precomputed=False, dist_func=None, kernal=lambda x:x):
                 dist_matrix[i,j] = kernal(0.0)
             else:
                 dist_matrix[i,j] = kernal(dist_func(data[i], data[j]))
+                dist_matrix[j,i] = dist_matrix[i,j]
     
     return dist_matrix
 
@@ -246,6 +247,9 @@ def efficiency_experiments(data_size, algs=None, dists=None):
 
     for alg in algs:
         for dist in dists:
+            if (alg=='spectral' and data_size>=40000) or (alg=='hierarchical' and data_size>=100000) or (alg=='dbscan' and data_size>=250000):
+                #spectral and hieraichical: Memory Error; dbscan: untoleratable time
+                continue
             data, labels, run_time = algorithm_runner(alg, dist, data_size=data_size, k=20)
             log_content = 'k:%s; data_size:%d; alg:%s; distance_type:%s; runtime:%d; ' % (20, data_size, alg, dist, run_time)
 
@@ -269,9 +273,12 @@ elif sys.argv[1] == 'quality':
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
-    for dataset in ['testdata1000','randomdata1000']:
-        for k in xrange(2, 20):
-            quality_experiments(dataset, k)
+    for k in xrange(2, 23):
+        for dataset in ['testdata1000','randomdata1000']:
+            try:
+                quality_experiments(dataset, k)
+            except Exception, e:
+                logging.debug(e.message + "[quality exception, location: k-%d; dataset-%s;]"%(k, dataset))
 elif sys.argv[1] == 'efficiency':
 
     logging.basicConfig(
@@ -287,6 +294,10 @@ elif sys.argv[1] == 'efficiency':
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
     for data_size in [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000, 25000, 40000, 80000, 100000, 200000, 250000,300000, 350000, 400000, 450000, 500000, 600000, 800000, 1000000, 1200000]:
-        efficiency_experiments(data_size, algs=['hierarchical', 'spectral', 'kmeans', 'dbscan'], dists=['vec'])
+        try:
+            efficiency_experiments(data_size, algs=['hierarchical', 'spectral', 'kmeans', 'dbscan'], dists=['vec'])
+        except Exception, e:
+            logging.debug(e.message + "[efficiency exception, location: k-%d;]"%(k))
+        
 
 
