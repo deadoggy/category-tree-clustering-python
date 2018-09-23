@@ -17,6 +17,12 @@ from config.load_config import Config
 data_loader = DataLoader()
 config = Config().config
 
+#cache
+vec_data = None
+vec_X = None
+edit_data = None
+edit_spec_X = None
+edit_X = None
 
 
 def _data_format(data, precomputed=False, dist_func=None, kernal=lambda x:x):
@@ -80,6 +86,12 @@ def algorithm_runner(alg, dist, **kwargs):
     if dist not in ['vec', 'edit']:
         raise Exception('dist in experiments not valid')
 
+    global vec_data
+    global vec_X
+    global edit_data
+    global edit_spec_X
+    global edit_X
+
     #start
     start_time = time.time()
 
@@ -96,17 +108,27 @@ def algorithm_runner(alg, dist, **kwargs):
             raise Exception('sigma is required in vectorized distance')
         sigma = config['sigma']
         pivots = generate_category_tree(data_loader)
-        data = data_loader.load(vectorized_convertor, pivots=pivots,sigma=sigma, valid_uid=valid_uid, data_size = data_size)
+        if vec_data is None:
+            vec_data = data_loader.load(vectorized_convertor, pivots=pivots,sigma=sigma, valid_uid=valid_uid, data_size = data_size)
+            vec_X = _data_format(vec_data, False, vectorized_dist_calculator)
+        data = vec_data
         metric = 'euclidean'
-        X = _data_format(data, False, vectorized_dist_calculator)
+        X = vec_X
     else:
-        data = data_loader.load(bottomup_edit_dist_converter, valid_uid=valid_uid, data_size = data_size)
+        if edit_data is None:
+            edit_data = data_loader.load(bottomup_edit_dist_converter, valid_uid=valid_uid, data_size = data_size)
+        data = edit_data
         metric = 'precomputed' 
         if alg == 'spectral':
             kernal = rbf
+            if edit_spec_X is None:
+                edit_spec_X = _data_format(data, True, bottomup_edit_dist_calculator, kernal=kernal)
+            X = edit_spec_X
         else:
             kernal = lambda x:x
-        X = _data_format(data, True, bottomup_edit_dist_calculator, kernal=kernal)
+            if edit_X is None:
+                edit_X = _data_format(data, True, bottomup_edit_dist_calculator, kernal=kernal)
+            X = edit_X
 
     #dbscan
     if alg == 'dbscan':
@@ -273,12 +295,19 @@ elif sys.argv[1] == 'quality':
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
-    for k in xrange(2, 23):
-        for dataset in ['testdata1000','randomdata1000']:
+    
+    for dataset in ['testdata1000','randomdata1000']:
+        for k in xrange(2, 23):
             try:
                 quality_experiments(dataset, k)
             except Exception, e:
                 logging.debug(e.message + "[quality exception, location: k-%d; dataset-%s;]"%(k, dataset))
+        vec_data = None
+        vec_X = None
+        edit_data = None
+        edit_spec_X = None
+        edit_X =None
+        
 elif sys.argv[1] == 'efficiency':
 
     logging.basicConfig(
