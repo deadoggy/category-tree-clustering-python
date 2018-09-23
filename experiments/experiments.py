@@ -246,7 +246,7 @@ def quality_experiments(dataset_name, k, algs=None, dists=None):
             logging.info(log_content)
         
 
-def efficiency_experiments(data_size):
+def efficiency_experiments(data_size, algs=None, dists=None):
     '''
         run efficiency experiments, evaluate index of results and generate log
 
@@ -266,39 +266,26 @@ def efficiency_experiments(data_size):
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
-    algs = ['covertree']
-    dists = ['vec']
+    algs = ['covertree', 'kmeans', 'spectral', 'hierarchical'] if algs is None else algs
+    dists = ['vec', 'edit'] if dists is None else dists
 
     for alg in algs:
         for dist in dists:
-            if alg=='kmeans' and (dist=='edit' or data_size > 25000):
-                continue
-            if alg=='spectral' and data_size > 5000:
-                continue
-            if alg=='hierarchical' and data_size > 50000000:
-                continue
-            if alg=='kmeans' and data_size > 25000:
-                continue
-            if alg=='dbscan' and data_size > 25000:
-                continue
             data, labels, run_time = algorithm_runner(alg, dist, data_size=data_size, k=20)
             log_content = 'k:%s; data_size:%d; alg:%s; distance_type:%s; runtime:%d; ' % (20, data_size, alg, dist, run_time)
 
             logging.info(log_content)
 
 
-# if len(sys.argv) == 1:
-#     raise Exception('which experiments?')
-# elif sys.argv[1] == 'quality':
-#     for dataset in ['testdata1000','randomdata1000']:
-#         for k in xrange(2, 20):
-#             quality_experiments(dataset, k)
-# elif sys.argv[1] == 'efficiency':
-#     for data_size in [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000, 25000, 40000, 80000, 100000, 200000, 250000,300000, 350000, 400000, 450000, 500000, 600000, 800000, 1000000, 1200000]:
-#         efficiency_experiments(data_size)
+if len(sys.argv) == 1:
+    raise Exception('which experiments?')
+elif sys.argv[1] == 'quality':
+    for dataset in ['testdata1000','randomdata1000']:
+        for k in xrange(2, 20):
+            quality_experiments(dataset, k)
+elif sys.argv[1] == 'efficiency':
+    for data_size in [500, 1000, 2000, 5000, 7500, 10000, 15000, 20000, 25000, 40000, 80000, 100000, 200000, 250000,300000, 350000, 400000, 450000, 500000, 600000, 800000, 1000000, 1200000]:
+        efficiency_experiments(data_size, algs=['hierarchical', 'spectral', 'kmeans', 'dbscan'], dists=['vec'])
 
-# efficiency_experiments(10000)
-
-quality_experiments('testdata1000', 8, algs=['covertree'], dists=['edit'])
 
 
