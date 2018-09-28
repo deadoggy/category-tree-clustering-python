@@ -97,10 +97,10 @@ class DataLoader:
         with open(self.data_file_name) as user_data_f:
             user_data = json.load(user_data_f)
         
-        ret_data = []
+        
         valid_uid = kwargs['valid_uid'] if kwargs.has_key('valid_uid') else None
         data_size = kwargs['data_size'] if kwargs.has_key('data_size') else float('inf')
-
+        ret_data = [None for i in xrange(len(user_data.keys()))] if valid_uid is None else [None for i in xrange(len(valid_uid))]
 
         for count, uid in enumerate(user_data.keys()):
             if count+1 > data_size:
@@ -110,7 +110,8 @@ class DataLoader:
             bus_dict = {}
             for bid in user_data[uid]:
                 bus_dict[bid] = self.get_business_cate_path(bid)
-            ret_data.append(convert_func(uid, bus_dict, kwargs))
+            index = count if valid_uid is None else valid_uid.index(uid)
+            ret_data[index] = convert_func(uid, bus_dict, kwargs)
         print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' loading finished'
         return ret_data
 

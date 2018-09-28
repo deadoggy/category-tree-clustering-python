@@ -219,7 +219,7 @@ def index(data, y_predict, index_name, dist_name, y_truth = None):
         X = _data_format(data, precomputed=True, dist_func=dist)
         return silhouette_score(X, y_predict, metric='precomputed')
     else:
-        if y_truth is None and y_predictd is not None:
+        if y_truth is None and y_predict is not None:
             raise Exception('rand index requires y_truth')
         return adjusted_rand_score(y_truth, y_predict)
 
@@ -248,6 +248,7 @@ def quality_experiments(dataset_name, k, algs=None, dists=None):
             if alg=='kmeans' and dist=='edit':
                 continue
             data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid, k=k)
+            print labels
             if -1 == data and labels == -1 and run_time == -1:
                 logging.debug("in dataset:%s"%dataset_name)
                 continue
@@ -265,6 +266,7 @@ def quality_experiments(dataset_name, k, algs=None, dists=None):
             log_content += ']'
 
             logging.info(log_content)
+            print '===================================================================================='
         
 
 def efficiency_experiments(data_size, algs=None, dists=None):
@@ -308,7 +310,7 @@ elif sys.argv[1] == 'quality':
     
     for dataset in [sys.argv[2]]:
         for k in xrange(2, 23):
-            quality_experiments(dataset, k)
+            quality_experiments(dataset, k, dists=['vec'], algs=['kmeans'])
         vec_data = None
         vec_X = None
         edit_data = None
