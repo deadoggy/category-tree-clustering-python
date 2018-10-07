@@ -25,7 +25,6 @@ def calculate_centers(data, y_labels):
     centers /= cen_size
     return np.array([ centers[y_labels[i]] for i in xrange(len(y_labels)) ])
 
-
 def ssw(data, y_labels):
     '''
         calculate ssw of clustering results, only support vector type
@@ -42,7 +41,6 @@ def ssw(data, y_labels):
             continue
         ssw += np.sum((d-centers[i])**2)
     return ssw 
-
 
 def ssb(data, y_labels):
     '''
@@ -63,7 +61,6 @@ def ssb(data, y_labels):
         c = centers[i]
         ssb += np.sum((c-x_avg)**2)
     return ssb
-
 
 def calinski_harabasz(data, y_labels):
     '''
@@ -211,7 +208,7 @@ def R_ij(data, centers, y_labels, cls1, cls2):
             center_2 = centers[i] if center_2 is None else center_2
     S_cls1 /= count_cls1
     S_cls2 /= count_cls2
-    d = np.sum(center_1, center_2)
+    d = np.sum((center_1-center_2)**2)
 
     return (S_cls1 + S_cls2) / d
 
@@ -225,7 +222,6 @@ def R_i(data, centers, y_labels, cls1):
         if tmp_res > res:
             res = tmp_res
     return res
-
 
 def davies_bouldin(data, y_labels):
     '''
@@ -255,8 +251,8 @@ def bic(data, y_labels):
         #return: bic
     '''
     label_set = set(y_labels)
-    d = len(data[0])
-    n = len(data)
+    dim = len(data[0])
+    n = float(len(data))
     m = len(label_set) - (1 if -1 in y_labels else 0)
     bic = 0.0
     centers = calculate_centers(data, y_labels)
@@ -272,10 +268,11 @@ def bic(data, y_labels):
     for l in label_set:
         if l == -1:
             continue
-        n_l = y_labels.tolist().count(l)
-        t = n_l*np.log2(n_l/n)-(n_l*d/2.0)*np.log2(2.0*np.pi)-(n_l/2.0)*np.log2(sigma_list[l]/(n_l-m))-(n_l-m)/2.0
+        n_l = float(y_labels.tolist().count(l))
+        t = n_l*np.log2(n_l/n)-(n_l*dim/2.0)*np.log2(2.0*np.pi)-(n_l/2.0)*np.log2(sigma_list[l]/(n_l-m))-(n_l-m)/2.0
         bic += t
     bic -= (m*np.log2(n))/2
+    print bic
     return bic
 
 
