@@ -51,7 +51,9 @@ def run(ui):
     global best_n
     global best_count
 
-    a = valid_users[ui]
+    a = data[ui]
+    print a
+    print '==============================='
     critrions = [0., .2, .4, .6, .8, 1.]
     n_uid = []
     count = 0
@@ -84,7 +86,7 @@ def run(ui):
     return count
 
 print len(valid_users)
-for i in xrange(len(valid_users)):
+for i in xrange(len(data)):
     l = run(i)
     if l==5:
         print 'done'
