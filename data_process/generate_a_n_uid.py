@@ -37,7 +37,7 @@ for u in data:
             non_zero_count+=1
         if v>max_v:
             max_v=v
-    if non_zero_count < 5:
+    if non_zero_count < 2:
         continue
     if max_v < 5:
         continue
@@ -71,15 +71,15 @@ def run(ui):
         if not found:
             n_uid.append(["None"])
         
-    if count>best_count and (best_a == [] or len(a[2]) > len(best_a[2])):
+    if count>=best_count and (best_a == [] or len(a[2]) > len(best_a[2])):
         best_a = a
         best_n = n_uid
         best_count = count
         with open(sys.path[0] + "/../a", "w") as a_out:
-            a_out.write(a[0])
+            a_out.write(str({"uid":a[0], "bus":a[2]}))
         with open(sys.path[0] + "/../n", "w") as n_out:
             for n in n_uid:
-                n_out.write(n[0] + "\n")
+                n_out.write(str({"uid":n[0], "bus":n[2]} if n[0] != "None" else "") + "\n")
         print best_count
     return count
 
