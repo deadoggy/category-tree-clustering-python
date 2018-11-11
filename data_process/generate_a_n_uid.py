@@ -39,7 +39,7 @@ for u in data:
             max_v=v
     if non_zero_count < 3:
         continue
-    if max_v < 8:
+    if max_v < 5:
         continue
     valid_users.append(u)
 
@@ -71,7 +71,7 @@ def run(ui):
         if not found:
             n_uid.append(["None"])
         
-    if count>best_count and (best_a == [] or len(a[2]) > len(best_a[2])):
+    if count>=best_count and (best_a == [] or len(a[2]) > len(best_a[2])):
         best_a = a
         best_n = n_uid
         best_count = count
