@@ -37,7 +37,7 @@ for u in data:
             non_zero_count+=1
         if v>max_v:
             max_v=v
-    if non_zero_count < 3:
+    if non_zero_count < 5:
         continue
     if max_v < 5:
         continue
