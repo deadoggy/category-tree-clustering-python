@@ -39,7 +39,7 @@ for u in data:
             max_v=v
     if non_zero_count < 3:
         continue
-    if max_v < 5:
+    if max_v < 8:
         continue
     valid_users.append(u)
 
@@ -76,10 +76,10 @@ def run(ui):
         best_n = n_uid
         best_count = count
         with open(sys.path[0] + "/../a", "w") as a_out:
-            a_out.write(a[0])
+            a_out.write(str({"uid":a[0], "bus":a[2]}))
         with open(sys.path[0] + "/../n", "w") as n_out:
             for n in n_uid:
-                n_out.write(n[0] + "\n")
+                n_out.write(str({"uid":n[0], "bus":n[2]} if n[0] != "None" else "") + "\n")
         print best_count
     return count
 
