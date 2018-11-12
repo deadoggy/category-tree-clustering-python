@@ -1,15 +1,12 @@
 #coding:utf-8
 
 import sys
-sys.path.append(sys.path[0] + '/../')
+sys.path.append(sys.path[0] + "/../")
 from data_loader.data_loader import DataLoader
 from copy import deepcopy, copy
-import random
 
 dataloader = DataLoader()
-#generate pivots:
-category_paths = dataloader.get_all_cate_path()
-ori_pivots = {}
+
 
 for path in category_paths:
     root_label = path[0]
