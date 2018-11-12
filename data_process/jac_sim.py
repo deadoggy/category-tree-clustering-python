@@ -12,28 +12,27 @@ import json
 # jaccard similarity category
 keys = [ -1., 0., .02, .04, .06, .08, .1, .12, .14, .16, .18, .2, .4, .6, .8, 1.]
 # category trees sigmods
-#sigmods = [1., 0.1, 0.01, 0.001, 0.0001]
-sigmods = [0.01]
+sigmas = [1., 0.1, 0.01, 0.001, 0.0001]
+
 dataloader = DataLoader()
+pivots = generate_category_tree(dataloader)
 def cluster_convertor(uid, bus_cate_dict, kwargs):
-    return [ uid, bus_cate_dict.keys()]
-data = dataloader.load(cluster_convertor)
+    ret = [ uid, bus_cate_dict.keys(), ]
+    for sig in sigmas:
+        kwargs['sigma'] = sig
+        ret.append(vectorized_convertor(uid, bus_cate_dict, kwargs))
+    return ret
+data = dataloader.load(cluster_convertor, pivots = pivots)
 valid_uid = []
 valid_bus = []
+sigma_data = [[], [], [], [], []]
 for u in data:
     if len(u[1]) < 5:
         continue
     valid_uid.append(u[0])
     valid_bus.append(u[1])
-
-pivots = generate_category_tree(dataloader)
-sigmod_data = []
-print "len of valid users:%d"%len(valid_uid)
-print "len of pivots:%d"%len(pivots)
-for sig in sigmods:
-    print sig
-    print valid_uid[0]
-    sigmod_data.append(dataloader.load(vectorized_convertor, pivots = pivots, sigma=sig, valid_uid=valid_uid))
+    for i in xrange(5):
+        sigma_data[i].append(u[i+2])
 
 print "++++++++++++++++++++ begin ++++++++++++++++++++++++++++++"
 f_out = []
@@ -53,8 +52,8 @@ for i in xrange(len(valid_uid)):
             up = keys[k+1]
             if jac_sim > low and jac_sim <= up:
                 out_pair = "%s,%s,%f"%(valid_uid[i], valid_uid[j], jac_sim)
-                for p in xrange(len(sigmods)):
-                    out_pair += ",%f"%vectorized_dist_calculator(sigmod_data[p][i], sigmod_data[p][j])
+                for p in xrange(len(sigmas)):
+                    out_pair += ",%f"%vectorized_dist_calculator(sigma_data[p][i], sigma_data[p][j])
                 f_out[k].write(str(out_pair) + "\n")
                 break
 for f in f_out:
