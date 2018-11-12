@@ -6,3 +6,5 @@ Other clustering algorithms like hierarchical, spectral clustering, kmeans and d
 
 But category-tree-clustering with python is much more slower than java version.
 
+JjicSN4Fyyi40DH7hGzc-A
+Hm0diOkWwpo9zotlJlqMUQ

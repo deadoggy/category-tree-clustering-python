@@ -19,27 +19,13 @@ for path in category_paths:
         break
 
 def cluster_convertor(uid, bus_cate_dict, kwargs):
-    pivots = deepcopy(ori_pivots)
-    for bid in bus_cate_dict:
-        for cate_path in bus_cate_dict[bid]:
-            pivots[cate_path[0]] += 1
-    return [ uid, pivots.values(), bus_cate_dict.keys()]
+    return [ uid, bus_cate_dict.keys()]
 
 data = dataloader.load(cluster_convertor)
-attributes = ori_pivots.keys()
 
 valid_users = []
 for u in data:
-    non_zero_count = 0
-    max_v = -1
-    for v in u[1]:
-        if v>0:
-            non_zero_count+=1
-        if v>max_v:
-            max_v=v
-    if non_zero_count < 3:
-        continue
-    if max_v < 5:
+    if len(u[1]) < 5:
         continue
     valid_users.append(u)
 
@@ -51,7 +37,7 @@ def run(ui):
     global best_n
     global best_count
 
-    a = data[ui]
+    a = valid_users[ui]
     print a
     print '==============================='
     critrions = [0., .2, .4, .6, .8, 1.]
@@ -61,9 +47,9 @@ def run(ui):
         lower_bound = critrions[i]
         upper_bound = critrions[i+1]
         found = False
-        for u in valid_users:
-            u_set = set(u[2])
-            a_set = set(a[2])
+        for u in data:
+            u_set = set(u[1])
+            a_set = set(a[1])
             inter_frac = float(len(u_set.intersection(a_set)))/float(len(a_set.union(u_set)))
             if inter_frac >= lower_bound and inter_frac < upper_bound:
                 n_uid.append(u)
@@ -73,21 +59,20 @@ def run(ui):
         if not found:
             n_uid.append(["None"])
         
-    if count>=best_count and (best_a == [] or len(a[2]) > len(best_a[2])):
+    if count>best_count or (count == best_count and (best_a == [] or len(a[1]) > len(best_a[1]))):
         best_a = a
         best_n = n_uid
         best_count = count
         with open(sys.path[0] + "/../a", "w") as a_out:
-            a_out.write(str({"uid":a[0], "bus":a[2]}))
+            a_out.write(str({"uid":a[0], "bus":a[1]}))
         with open(sys.path[0] + "/../n", "w") as n_out:
             for n in n_uid:
-                n_out.write(str({"uid":n[0], "bus":n[2]} if n[0] != "None" else "") + "\n")
+                n_out.write(str({"uid":n[0], "bus":n[1]} if n[0] != "None" else "") + "\n")
+        print '++++++++++++++++++++++++++++++'
         print best_count
+        print '++++++++++++++++++++++++++++++'
     return count
 
 print len(valid_users)
-for i in xrange(len(data)):
+for i in xrange(len(valid_users)):
     l = run(i)
-    if l==5:
-        print 'done'
-        break
