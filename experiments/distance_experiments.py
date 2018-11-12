@@ -81,4 +81,5 @@ def generate_eighty_percent():
         u_set = set(u_data[1])
         print float(len(a_set.intersection(u_set)))/float(len(a_set.union(u_set)))
 
-generate_eighty_percent()
+def jac_sim_stat():
+    dataloader = DataLoader()
