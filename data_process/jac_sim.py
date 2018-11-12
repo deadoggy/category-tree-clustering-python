@@ -12,8 +12,8 @@ import json
 # jaccard similarity category
 keys = [ -1., 0., .02, .04, .06, .08, .1, .12, .14, .16, .18, .2, .4, .6, .8, 1.]
 # category trees sigmods
-sigmods = [1., 0.1, 0.01, 0.001, 0.0001]
-
+#sigmods = [1., 0.1, 0.01, 0.001, 0.0001]
+sigmods = [0.01]
 dataloader = DataLoader()
 def cluster_convertor(uid, bus_cate_dict, kwargs):
     return [ uid, bus_cate_dict.keys()]
@@ -28,10 +28,14 @@ for u in data:
 
 pivots = generate_category_tree(dataloader)
 sigmod_data = []
+print "len of valid users:%d"%len(valid_uid)
+print "len of pivots:%d"%len(pivots)
 for sig in sigmods:
+    print sig
+    print valid_uid[0]
     sigmod_data.append(dataloader.load(vectorized_convertor, pivots = pivots, sigma=sig, valid_uid=valid_uid))
 
-
+print "++++++++++++++++++++ begin ++++++++++++++++++++++++++++++"
 f_out = []
 for i in xrange(len(keys)-1):
     f_out.append(open("distance_%f"%keys[i+1], 'a'))
