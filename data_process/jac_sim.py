@@ -27,15 +27,15 @@ valid_uid = []
 valid_bus = []
 sigma_data = [[], [], [], [], []]
 for u in data:
-    if len(u[1]) < 5:
+    if len(u[1]) <= 5:
         continue
     valid_uid.append(u[0])
     valid_bus.append(u[1])
     for i in xrange(5):
         sigma_data[i].append(u[i+2])
 
-
 print "++++++++++++++++++++ begin ++++++++++++++++++++++++++++++"
+print len(valid_uid)
 f_out = []
 for i in xrange(len(keys)-1):
     f_out.append(open("distance_%f"%keys[i+1], 'a'))
