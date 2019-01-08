@@ -164,8 +164,8 @@ def vectorized_convertor(uid, bus_cate_dict, kwargs):
             # print (2.0*np.power(s, 2))
             feature_arr[d] = np.exp(-np.power(u, 2)/(2.0*np.power(s, 2))) \
             if mean[d]!=0. else 1.
-
-    return feature_arr
+    feature_arr = np.array(feature_arr)
+    return (feature_arr - feature_arr.min())/(feature_arr.max() - feature_arr.min())
 
 def vectorized_dist_calculator(v_1, v_2):
     '''

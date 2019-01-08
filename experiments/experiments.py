@@ -40,7 +40,7 @@ def _data_format(data, precomputed=False, dist_func=None, kernal=lambda x:x):
         #return: if precomputed => a square matrix; else => feature vec ndarray
     '''
     if not precomputed:
-        return normalize(np.array(data), axis=1)
+        return np.array(data)
     
     if dist_func is None or not callable(dist_func):
         raise Exception('a callable distance function is required')
