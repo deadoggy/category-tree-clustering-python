@@ -11,8 +11,12 @@ from ctc.covertree_clustering import *
 import time
 import logging
 import numpy as np
-from sklearn.metrics import silhouette_score, adjusted_rand_score
+from sklearn.preprocessing import minmax_scale
+from sklearn.preprocessing import normalize
+from sklearn.metrics import silhouette_score, adjusted_rand_score, mean_squared_error
 from config.load_config import Config
+import os
+
 
 data_loader = DataLoader()
 config = Config().config
@@ -36,7 +40,7 @@ def _data_format(data, precomputed=False, dist_func=None, kernal=lambda x:x):
         #return: if precomputed => a square matrix; else => feature vec ndarray
     '''
     if not precomputed:
-        return np.array(data)
+        return normalize(np.array(data), axis=1)
     
     if dist_func is None or not callable(dist_func):
         raise Exception('a callable distance function is required')
@@ -69,14 +73,16 @@ def rbf(dist):
     '''
     #parameter modified here#
     sigma = config['rbf_sigma']
-
     return np.exp(-(dist**2)/(2*(sigma**2)))
+
+def rare_sim(dist):
+    return dist
 
 def algorithm_runner(alg, dist, **kwargs):
     '''
         run algorithms; running time includes loading and converting data into acceptable format
 
-        @alg: string, which clustering algorithm to use, in ['covertree', 'hierarichical', 'dbscan', 'kmeans', 'spectral']
+        @alg: string, which clustering algorithm to use, in ['covertree', 'hierarchical', 'dbscan', 'kmeans', 'spectral']
         @dist: string, which distance to use, in ['vec', 'edit']
     '''
 
@@ -107,26 +113,28 @@ def algorithm_runner(alg, dist, **kwargs):
         if not config.has_key('sigma'):
             raise Exception('sigma is required in vectorized distance')
         sigma = config['sigma']
+        mean = config['mean']
         pivots = generate_category_tree(data_loader)
-        if vec_data is None:
-            vec_data = data_loader.load(vectorized_convertor, pivots=pivots,sigma=sigma, valid_uid=valid_uid, data_size = data_size)
+        if vec_data is None and sys.argv[1] != 'efficiency':
+            vec_data = data_loader.load(vectorized_convertor, pivots=pivots,sigma=sigma, valid_uid=valid_uid, mean=mean, data_size = data_size)
             vec_X = _data_format(vec_data, False, vectorized_dist_calculator)
+            # print vec_X
         data = vec_data
         metric = 'euclidean'
         X = vec_X
     else:
-        if edit_data is None:
+        if edit_data is None and sys.argv[1] != 'efficiency':
             edit_data = data_loader.load(bottomup_edit_dist_converter, valid_uid=valid_uid, data_size = data_size)
         data = edit_data
         metric = 'precomputed' 
         if alg == 'spectral':
             kernal = rbf
-            if edit_spec_X is None:
+            if edit_spec_X is None and sys.argv[1] != 'efficiency':
                 edit_spec_X = _data_format(data, True, bottomup_edit_dist_calculator, kernal=kernal)
             X = edit_spec_X
         else:
             kernal = lambda x:x
-            if edit_X is None:
+            if edit_X is None and sys.argv[1] != 'efficiency':
                 edit_X = _data_format(data, True, bottomup_edit_dist_calculator, kernal=kernal)
             X = edit_X
 
@@ -157,7 +165,7 @@ def algorithm_runner(alg, dist, **kwargs):
             affinity = 'precomputed' if dist=='edit' else 'rbf'
             labels = SpectralClustering(affinity=affinity, n_clusters=k).fit_predict(X)
         except Exception,e:
-            logging.debug(e.message + " [exception, location: alg:%s; k-%d; dist:%s]"%(alg, k, dist))
+            # logging.debug(e.message + " [exception, location: alg:%s; k-%d; dist:%s]"%(alg, k, dist))
             return (-1, -1, -1)
         
     
@@ -170,12 +178,15 @@ def algorithm_runner(alg, dist, **kwargs):
         calculator = vectorized_dist_calculator if dist=='vec' else bottomup_edit_dist_calculator
         top_level = (config['edit_top_level'] if dist=='edit' else config['vec_top_level']) 
         dct = DensityCoverTree(calculator, top_level)
+	
         for i, d in enumerate(data):
-            dct.insert(Node(val=d, index=i))
+	        dct.insert(Node(val=d, index=i))
         labels = covertree_clustering(dct, k)
 
     #end
     end_time = time.time()
+    #print labels
+    #print alg
     return (data, labels, end_time-start_time)
 
 def index(data, y_predict, index_name, dist_name, y_truth = None):
@@ -189,7 +200,7 @@ def index(data, y_predict, index_name, dist_name, y_truth = None):
         @y_truth: ndarray, shape(len(data),), truth
         return: float
     '''
-    if index_name not in ['sc', 'mae', 'rand']:
+    if index_name not in ['sc', 'mae', 'rand', 'mse']:
         raise Exception('%s not supported'%index_name)
     if dist_name not in ['vec', 'edit']:
         raise Exception('%s not supported'%dist_name)
@@ -215,13 +226,50 @@ def index(data, y_predict, index_name, dist_name, y_truth = None):
                     cls_mae += dist(clus[i], clus[j])
             mae += (cls_mae / len(clus)) if len(clus) > 0 else 0.0
         return mae / len(data)
+    if index_name == 'mse':
+        clusters_centers = [ np.array(np.zeros(22)) for i in xrange(k) ]
+        clusters_count = [ 0 for i in xrange(k) ]
+        for i, cls_i in enumerate(y_predict):
+            if -1 != cls_i:
+                clusters_centers[cls_i] += np.array(data[i])
+                clusters_count[cls_i] += 1
+        for i, ctr in enumerate(clusters_centers):
+            clusters_centers[i] = ctr/clusters_count[i]
+        return mean_squared_error([ clusters_centers[i] for i in y_predict ], data)
+
     elif index_name == 'sc':
-        X = _data_format(data, precomputed=True, dist_func=dist)
-        return silhouette_score(X, y_predict, metric='precomputed')
+        if dist_name == 'vec':
+            precomputed = False
+            metric = 'euclidean'
+        else:
+            precomputed = True
+            metric = 'precomputed'
+        X = _data_format(data, precomputed=precomputed, dist_func=dist)
+        return silhouette_score(X, y_predict, metric=metric)
     else:
         if y_truth is None and y_predict is not None:
             raise Exception('rand index requires y_truth')
         return adjusted_rand_score(y_truth, y_predict)
+
+def sim_variance(dataset_name):
+    '''
+        calculate variance of similarity
+    '''
+    with open(config['processed_data_path'] + dataset_name,'r') as valid_uid_f:
+        valid_uid = valid_uid_f.read().split('\n')
+    pivots = generate_category_tree(data_loader)
+    vec_data = np.array(data_loader.load(vectorized_convertor, pivots=pivots,sigma=0., valid_uid=valid_uid))
+    print '========================================='
+    vars = []
+    means = []
+    for i in xrange(22):
+        vars.append(np.sqrt(np.var(vec_data[:,i])))
+        means.append(np.mean(vec_data[:,i]))
+
+
+    print vars
+    print means
+
 
 def quality_experiments(dataset_name, k, algs=None, dists=None):
     '''
@@ -232,13 +280,13 @@ def quality_experiments(dataset_name, k, algs=None, dists=None):
 
     algs = [ 'covertree', 'kmeans', 'spectral', 'hierarchical'] if algs is None else algs
     dists = ['vec','edit'] if dists is None else dists
-    indexs = ['sc', 'mae', 'rand']
-    with open(dataset_name,'r') as valid_uid_f:
+    indexs = ['sc', 'mse', 'rand']
+    with open(config['processed_data_path'] + dataset_name, 'r') as valid_uid_f:
             valid_uid = valid_uid_f.read().split('\n')
 
     y_truth = None
-    if dataset_name == 'testdata1000':
-        with open('testtruth','r') as truth_f:
+    if dataset_name.find('testdata')>=0:
+        with open(config['processed_data_path'] + 'testtruth','r') as truth_f:
             y_truth = truth_f.read().split('\n')
         for i in xrange(len(y_truth)):
             y_truth[i] = int(y_truth[i])
@@ -248,14 +296,22 @@ def quality_experiments(dataset_name, k, algs=None, dists=None):
             if alg=='kmeans' and dist=='edit':
                 continue
             data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid, k=k)
-            print labels
             if -1 == data and labels == -1 and run_time == -1:
                 logging.debug("in dataset:%s"%dataset_name)
                 continue
             log_content = 'k:%s; dataset:%s; alg:%s; distance_type:%s; runtime:%d; ' % (k, dataset_name, alg, dist, run_time)
+            date = time.strftime("%Y-%m-%d", time.localtime())
+
+            if not os.path.exists(sys.path[0] + "/../result/%s/"%date):
+                os.makedirs(sys.path[0] + "/../result/%s/"%date)
+            with open("result/%s/%s_%s_%d_%s.out"%(date, alg, dist, k, date), "w") as exp_out:
+                for l in labels:
+                    exp_out.write(str(l))
+                    exp_out.write('\r\n')
+            
             #index
             for idx in indexs:
-                if dataset_name=='randomdata1000' and idx=='rand':
+                if dataset_name.find('randomdata')>=0 and idx=='rand':
                     continue
                 index_val = index(data, labels, idx, dist, y_truth)
                 log_content += '%s:%s; '%(idx, str(index_val))
@@ -264,9 +320,8 @@ def quality_experiments(dataset_name, k, algs=None, dists=None):
             for c in set(labels):
                 log_content += '%d '%labels.tolist().count(c)
             log_content += ']'
-
+            
             logging.info(log_content)
-            print '===================================================================================='
         
 
 def efficiency_experiments(data_size, algs=None, dists=None):
@@ -291,6 +346,8 @@ def efficiency_experiments(data_size, algs=None, dists=None):
 
 
 
+
+
 if len(sys.argv) == 1:
     raise Exception('which experiments?')
 elif sys.argv[1] == 'quality':
@@ -307,15 +364,17 @@ elif sys.argv[1] == 'quality':
     console.setFormatter(formatter)
     logging.getLogger('').addHandler(console)
 
+    # sim_variance(sys.argv[2])
     
     for dataset in [sys.argv[2]]:
-        for k in xrange(2, 23):
-            quality_experiments(dataset, k, dists=['vec'], algs=['kmeans'])
+        for k in xrange(2, 7):
+            print "k:" + str(k)
+            quality_experiments(dataset, k, dists=['vec'], algs=["spectral", "hierarchical", "covertree", "kmeans"])
         vec_data = None
         vec_X = None
         edit_data = None
         edit_spec_X = None
-        edit_X =None
+        edit_X = None
         
 elif sys.argv[1] == 'efficiency':
 

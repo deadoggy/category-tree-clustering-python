@@ -12,8 +12,8 @@
             "console": "integratedTerminal",
             "args": [
                 "quality",
-                "besttestdata3000"
-            ]
+                "testdata3000"
+            ]   
         },
         {
             "name": "Python: Attach",
@@ -21,6 +21,13 @@
             "request": "attach",
             "port": 5678,
             "host": "localhost"
+        },
+        {
+            "name": "Python: Module",
+            "type": "python",
+            "request": "launch",
+            "module": "enter-your-module-name-here",
+            "console": "integratedTerminal"
         },
         {
             "name": "Python: Django",

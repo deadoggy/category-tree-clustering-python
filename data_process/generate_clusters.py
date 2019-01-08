@@ -4,6 +4,7 @@ import sys
 sys.path.append(sys.path[0] + '/../')
 from data_loader.data_loader import DataLoader
 from copy import deepcopy, copy
+import random
 
 dataloader = DataLoader()
 
@@ -29,13 +30,20 @@ def cluster_convertor(uid, bus_cate_dict, kwargs):
 
 data = dataloader.load(cluster_convertor)
 
+# valid_user = random.sample(data, 5000)
+
 valid_user = []
 label = []
+# with open('/home/yinjia/random5000', 'w') as uid_out:
+#     for u in valid_user:
+#         uid_out.write(u[0])
+#         if u != valid_user[-1]:
+#             uid_out.write('\n')
 
+d_index = range(22)
+sizes = [1000, 600, 600, 800]
 
-d_index = range(21)
-sizes = [250, 250, 200, 300]
-
+print len(data)
 current_label = 0
 current_size_index = 0
 
@@ -45,10 +53,12 @@ for d in d_index:
     for item in data:
         uid = item[0]
         vec = item[1]
-        if len(set(vec)) <= 2 or vec[-1] > 0:
+        # if len(set(vec)) <= 2 or vec[-1] > 0:
+        #     continue
+        if vec[-1] > 0:
             continue
         max_dim = max(vec)
-        if max_dim != vec[d]:
+        if max_dim != vec[d] or vec.count(max_dim) > 1:
             continue
         if max_dim < 3:
             continue
@@ -56,9 +66,10 @@ for d in d_index:
         for val in vec:
             if val < max_dim and val > second_max:
                 second_max = val
-        if (float(second_max) / float(max_dim)) < 0.3:
-            if item[0] not in valid_user:
-                d_valid_uid.append(item)
+        if (float(second_max) / float(max_dim)) >= .0 and (float(second_max) / float(max_dim)) <= .4:
+            print (float(second_max) / float(max_dim))
+            if item[0] not in valid_user and item[0] not in d_valid_uid:
+                d_valid_uid.append(item[0])
             if len(d_valid_uid) == size:
                 valid_user.extend(d_valid_uid)
                 label.extend([current_label for i in xrange(size)])
@@ -68,13 +79,15 @@ for d in d_index:
     if current_size_index == 4:
         break
 
+if len(set(valid_user)) != len(valid_user):
+    print "Duplicates"
 
 
-with open('/home/yinjia/testdata1000', 'a') as uid_out:
-    with open('/home/yinjia/testtruth', 'a') as  label_out:
-        with open('/home/yinjia/vec', 'a') as vec_out:
+with open('/home/yinjia/Documents/besttestdata3000_var', 'w') as uid_out:
+    with open('/home/yinjia/Documents/testtruth_var', 'w') as  label_out:
+        with open('/home/yinjia/Documents/bestvec', 'w') as vec_out:
             for u in valid_user:
-                uid_out.write(u[0])
+                uid_out.write(u)
                 vec_out.write(str(u[1]) + "\n")
                 if u != valid_user[-1]:
                     uid_out.write('\n')

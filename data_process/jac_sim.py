@@ -23,6 +23,7 @@ def cluster_convertor(uid, bus_cate_dict, kwargs):
         ret.append(vectorized_convertor(uid, bus_cate_dict, kwargs))
     return ret
 data = dataloader.load(cluster_convertor, pivots = pivots)
+
 valid_uid = []
 valid_bus = []
 sigma_data = [[], [], [], [], []]
