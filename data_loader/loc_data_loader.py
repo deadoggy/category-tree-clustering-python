@@ -71,16 +71,18 @@ class LocDataLoader:
         
         valid_uid = kwargs['valid_uid'] if kwargs.has_key('valid_uid') else user_data.keys()
         data_size = kwargs['data_size'] if kwargs.has_key('data_size') else float('inf')
-        ret_data = [None for i in xrange(len(user_data.keys()))] if valid_uid is None else [None for i in xrange(len(valid_uid))]
+        #ret_data = [None for i in xrange(len(user_data.keys()))] if valid_uid is None else [None for i in xrange(len(valid_uid))]
+        ret_data = {}
 
         for idx, uid in enumerate(valid_uid):
             if idx+1 > data_size:
                 break
-
+            if (idx + 1)%10000==0:
+                print idx
             bus_loc_dict = {}
             for bid in user_data[uid]:
                 bus_loc_dict[bid] = [self.business[bid][self.top_level:]]
             ret_idx = idx if len(valid_uid)==len(user_data) else valid_uid.index(uid)
-            ret_data[ret_idx] = convert_func(uid, bus_loc_dict, kwargs)
+            ret_data[uid] = convert_func(uid, bus_loc_dict, kwargs)
         print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' loading finished'
         return ret_data

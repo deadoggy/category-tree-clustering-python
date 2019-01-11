@@ -134,7 +134,10 @@ def vectorized_convertor(uid, bus_cate_dict, kwargs):
     pivots = kwargs['pivots']
     if type(pivots) != list:
         raise Exception('pivots in kwargs must be a list of CateTree')
-    sigma = kwargs['sigma']
+    try:
+        sigma = kwargs['sigma']
+    except Exception, e:
+        sigma = 0.
     if type(sigma) != float and type(sigma)!=int and type(sigma)!=list:
         raise Exception('sigma in kwargs must be a float or an int or an list')
     if kwargs.has_key("mean"):
@@ -142,7 +145,7 @@ def vectorized_convertor(uid, bus_cate_dict, kwargs):
     else:
         mean = None
 
-    feature_arr = np.array([0.0 for i in xrange(len(pivots))])
+    feature_arr = [0.0 for i in xrange(len(pivots))]
     path_sets = []
     for key in bus_cate_dict.keys():
         for p in bus_cate_dict[key]:
@@ -162,10 +165,12 @@ def vectorized_convertor(uid, bus_cate_dict, kwargs):
             # u= -u if u<0. else u
             # print u
             # print (2.0*np.power(s, 2))
-            feature_arr[d] = np.exp(-np.power(u, 2)/(2.0*np.power(s, 2))) \
-            if mean[d]!=0. else 1.
+            # feature_arr[d] = np.exp(-np.power(u, 2)/(2.0*np.power(s, 2))) \
+            # if mean[d]!=0. else 1.
+            feature_arr[d] = u
+
     feature_arr = np.array(feature_arr)
-    return (feature_arr - feature_arr.min())/(feature_arr.max() - feature_arr.min())
+    return ((feature_arr - feature_arr.min())/(feature_arr.max() - feature_arr.min())).tolist()
 
 def vectorized_dist_calculator(v_1, v_2):
     '''

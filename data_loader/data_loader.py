@@ -105,8 +105,6 @@ class DataLoader:
         for count, uid in enumerate(valid_uid):
             if count+1 > data_size:
                 break
-            # if valid_uid is not None and uid not in valid_uid:
-            #     continue 
             bus_dict = {}
             for bid in user_data[uid]:
                 bus_dict[bid] = self.get_business_cate_path(bid)
