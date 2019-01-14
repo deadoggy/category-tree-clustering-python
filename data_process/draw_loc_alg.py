@@ -25,7 +25,7 @@ log_data = {
     }
 }
 
-k = [ str(i) for i in range(2, 72)]
+k = [ i for i in range(2, 72)]
 
 for l in logs:
     item = pattern.findall(l)
@@ -41,7 +41,32 @@ for l in logs:
     log_data[dataset][alg]['sc'].append(sc)
     log_data[dataset][alg]['mse'].append(mse)
 
-plt.plot(k, log_data['address']['KMeans']['sc'])
-plt.grid()
+
+formatter = ticker.ScalarFormatter(useMathText=True)
+formatter.set_scientific(True) 
+formatter.set_powerlimits((-1,1)) 
+
+fig, axs = plt.subplots(nrows=3, ncols=2)
+fig.set_size_inches(12, 9)
+for didx, dataset in enumerate(['address','epsg3857']):
+    for aidx, alg in enumerate(['KMeans','Spectral','Hierarchical']):
+        sc_ax = axs[aidx][didx]
+        mse_ax = sc_ax.twinx()
+        sc_ax.set_title(dataset + ":" + alg, fontsize=10)
+        mse_ax.set_title(dataset + ":" + alg, fontsize=10)
+        sc_ax.grid('true', linestyle=":", linewidth=0.7)
+        mse_ax.grid('true', linestyle=":", linewidth=0.7)
+        mse_ax.spines['top'].set_visible(False)
+        sc_ax.plot(k, log_data[dataset][alg]['sc'], linestyle='-', color='k', label='SC')
+        if didx==0 and aidx==0:
+            sc_ax.legend(loc='upper right', bbox_to_anchor=(0.1, 1.18),
+               ncol=1, mode=None, borderaxespad=0., frameon=False , fontsize=12)
+        mse_ax.plot(k, log_data[dataset][alg]['mse'], linestyle=':', color='k', label='MSE')
+        mse_ax.yaxis.set_major_formatter(formatter)
+        if didx==0 and aidx==0:
+            mse_ax.legend(loc='upper right', bbox_to_anchor=(0.3, 1.18),
+            ncol=1, mode=None, borderaxespad=0., frameon=False , fontsize=12)
+
+plt.tight_layout()
 plt.show()
 
