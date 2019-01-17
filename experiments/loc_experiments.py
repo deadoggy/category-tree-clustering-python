@@ -6,10 +6,6 @@ sys.path.append(sys.path[0] + '/../')
 from sklearn.cluster import *
 from data_loader.data_loader import DataLoader
 from data_loader.loc_data_loader import LocDataLoader
-from dist.bottom_up_edit_dist import *
-from dist.vectorized_user_cate_dist import *
-from ctc.density_covertree import *
-from ctc.covertree_clustering import *
 import time
 import logging
 import numpy as np
@@ -96,8 +92,12 @@ address_X = X['user_X']
 
 n_clusters = 10
 
+def eul(a,b):
+    return np.sqrt(np.sum(np.power((a-b)**2,2)))
+
 def sc(X, label):
     return silhouette_score(X, label)
+
 def mse(X, label):
     k = len(set(label))
     ctrs = np.array([ [0. for i in xrange(len(X[0]))] for i in xrange(k)])
@@ -121,13 +121,16 @@ def cls_size(label):
     return rlt 
 
 #address
-X_list = [ np.array(address_X), np.array(epsg3857_X)]
-for k in xrange(45, 46):
+X_list = [np.array(address_X) ,np.array(epsg3857_X)]
+X_names = ['address','epsg3857']
+for k in xrange(2, 46):
     for idx, _X in enumerate(X_list):
-        X_name = 'address' if idx==0 else 'epsg3857'
+        X_name = X_names[idx]
         #kmeans
         km_label = KMeans(n_clusters=k).fit_predict(_X)
+        print km_label
         km_sc = sc(_X, km_label)
+        print km_sc
         km_mse = mse(_X, km_label)
         km_cls_size = str(cls_size(km_label))
         logging.info('KMeans, %s, k=%d, sc=%f, mse=%f, size=%s'%(X_name, k, km_sc, km_mse, km_cls_size))

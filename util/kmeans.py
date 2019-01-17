@@ -58,8 +58,9 @@ def KMeans(dataset, k, ctr_initializer, ctr_generator, dist, max_itrs = 300):
         @k: int, size of target clusters
         @ctr_initializer: callable, func to initialize k random centers, args=(dataset, k)
         @ctr_generator: callabel, func to generate new centers, args=(dataset, labels, k)
-        @dist: callable, func to calculate distance between data points
+        @dist: callable, func to calculate distance between data points args=(dp_1, dp_2)
         @max_itrs: int, max times of iterations
+
 
         #return: list, shape=[N:], labels of data point
     '''
@@ -68,17 +69,22 @@ def KMeans(dataset, k, ctr_initializer, ctr_generator, dist, max_itrs = 300):
     labels_changed = True
     itrs = 0
     while itrs <= max_itrs and labels_changed:
+        # print itrs
         labels_changed = False
         for idx, dp in enumerate(dataset): # assign each data point to the nearest center
+        
             min_dist = float('inf'); min_label = -1
             for l, ctr in enumerate(centers):
+                # print "==="
+                # print len(ctr)
+                # print "==="
                 tmp_dist = dist(dp, ctr)
                 if tmp_dist<min_dist:
                     min_dist=tmp_dist; min_label=l
             if min_label!= labels[idx]: # check if the clusters changes
                 labels_changed = True
                 labels[idx] = min_label
-        ctr_generator(dataset, labels, k)
+        centers = ctr_generator(dataset, labels, k)
         itrs += 1
     return labels
 
@@ -95,4 +101,5 @@ def test():
     labels = KMeans(dataset, 2, rand_center, generate_new_centers, dist=dist_metric)
     print labels
 
-test()
+if __name__=='__main__':
+    test()
