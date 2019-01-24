@@ -95,7 +95,7 @@ def latlon_dist(size):
     try:
         if latlon_switcher[1]:
             sp_start = time.time()
-            #SpectralClustering(n_clusters=16).fit_predict(data)
+            SpectralClustering(n_clusters=16).fit_predict(data)
             sp_end = time.time()
             sp_time = sp_end - sp_start
         else:

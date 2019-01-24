@@ -14,7 +14,6 @@ from sklearn.preprocessing import normalize
 from sklearn.metrics import silhouette_score, adjusted_rand_score, mean_squared_error
 from config.load_config import Config
 import os
-from geopy.distance import vincenty
 import json
 import random
 from pyproj import Proj, transform

@@ -16,10 +16,12 @@ with open(config['processed_data_path'] + 'lasvegas_user_latlon.json') as vec_in
 dist = [0 for i in xrange(9)]
 ranges = [[1., 1.], [1, 5], [5, 10], [10, 50], [50, 100], [100, 200], [200, 500], [500, 1000], [1000, 2000]]
 
+sum_num = 0.
 
 for uid in vec_data.keys():
     item = vec_data[uid]
     num = len(vec_data[uid])
+    sum_num += num
     try:
         if num == 1:
             dist[0] += 1
@@ -30,6 +32,10 @@ for uid in vec_data.keys():
                     break
     except Exception, e:
         print num
+
+print "users:%f; average numbers:%f"%(len(vec_data.keys()), sum_num / len(vec_data.keys())) 
+
+exit()
 
 xLocator   = MultipleLocator(1)
 ax = plt.subplot()
