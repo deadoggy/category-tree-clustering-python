@@ -70,8 +70,8 @@ pivots = loc_dataloader.generate_pivots()
 
 sizes = [1000, 5000, 10000, 20000, 40000, 80000, 160000, 320000, 500000]
 
-cate_switcher = [True, True, True]
-latlon_switcher = [True, True, True]
+cate_switcher = [False, False, False, True]
+latlon_switcher = [False, False, False, True]
 
 def latlon_dist(size):
     global latlon_switcher
@@ -115,8 +115,20 @@ def latlon_dist(size):
     except Exception, e:
         ha_time = float('inf')
         latlon_switcher[2] = False
+
+    try:
+        if latlon_switcher[3]:
+            db_start = time.time()
+            DBSCAN(eps=.42, min_samples=19).fit_predict(data)
+            db_end = time.time()
+            db_time = ha_end - ha_start
+        else:
+            db_time = float('inf')
+    except Exception, e:
+        db_time = float('inf')
+        latlon_switcher[3] = False
     
-    log_msg = 'dist:latlon, load time:%fs, KMeans:%fs, Spectral:%fs, Hierarchical:%fs'%(load_time, km_time, sp_time, ha_time)
+    log_msg = 'dist:latlon, load time:%fs, KMeans:%fs, Spectral:%fs, Hierarchical:%fs, DBSCAN:%fs'%(load_time, km_time, sp_time, ha_time, db_time)
     return log_msg
 
 def category_dist(size):
@@ -162,7 +174,19 @@ def category_dist(size):
         ha_time = float('inf')
         cate_switcher[2] = False
     
-    log_msg = 'dist:cate, load time:%fs, KMeans:%fs, Spectral:%fs, Hierarchical:%fs'%(load_time, km_time, sp_time, ha_time)
+    try:
+        if cate_switcher[3]:
+            db_start = time.time()
+            DBSCAN(eps=.42, min_samples=19).fit_predict(data)
+            db_end = time.time()
+            db_time = ha_end - ha_start
+        else:
+            db_time = float('inf')
+    except Exception, e:
+        db_time = float('inf')
+        cate_switcher[3] = False
+    
+    log_msg = 'dist:cate, load time:%fs, KMeans:%fs, Spectral:%fs, Hierarchical:%fs, DBSCAN:%fs'%(load_time, km_time, sp_time, ha_time, db_time)
     return log_msg
 
 
