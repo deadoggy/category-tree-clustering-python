@@ -40,10 +40,19 @@ def latlon_to_3857(lat, lon):
     x2, y2 = transform(p1, p2, x1, y1, radians=True)
     return x2, y2
 
-# loc_dataloader = LocDataLoader('lasvegas_business.json','lasvegas_ub.json',2)
-# pivots = loc_dataloader.generate_pivots()
-# data = loc_dataloader.load(vectorized_convertor, pivots=pivots)
+loc_dataloader = LocDataLoader('lasvegas_business.json','lasvegas_ub.json',2)
+pivots = loc_dataloader.generate_pivots()
+data = loc_dataloader.load(vectorized_convertor, pivots=pivots)
 
+root_name = []
+for p in pivots:
+    root_name.append(p.root.chd_set[0].label)
+
+with open("/home/yinjia/pivots_name.txt", "w") as o:
+    for n in root_name:
+        o.write(n)
+        o.write('\n')
+exit()
 # with open(config['processed_data_path'] + 'lasvegas_user_vec.json', 'w') as out:
 #     json.dump(data, out)
 

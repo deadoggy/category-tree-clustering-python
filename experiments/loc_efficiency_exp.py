@@ -121,10 +121,11 @@ def latlon_dist(size):
             db_start = time.time()
             DBSCAN(eps=.42, min_samples=19).fit_predict(data)
             db_end = time.time()
-            db_time = ha_end - ha_start
+            db_time = db_end - db_start
         else:
             db_time = float('inf')
     except Exception, e:
+        print
         db_time = float('inf')
         latlon_switcher[3] = False
     
@@ -179,7 +180,7 @@ def category_dist(size):
             db_start = time.time()
             DBSCAN(eps=.42, min_samples=19).fit_predict(data)
             db_end = time.time()
-            db_time = ha_end - ha_start
+            db_time = db_end - db_start
         else:
             db_time = float('inf')
     except Exception, e:

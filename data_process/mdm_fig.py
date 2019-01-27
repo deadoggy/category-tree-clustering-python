@@ -81,7 +81,7 @@ def resort_affi(X, label):
 
 def heatmap(X, title):
     ax = plt.subplot()
-    ax.imshow(X)
+    ax.imshow(X, cmap='gray')
     #ax.set_title(title)
     ax.set_xticks([])
     ax.set_yticks([])
@@ -119,28 +119,35 @@ uids = X['uids']
 epsg3857_X = X['user_3857_X']
 address_X = X['user_X']
 epsg3857_X_all = X['user_3857_all']
-k = 17
+k = 20
 
-_X = address_X
-# km_label = KMeans(n_clusters=k).fit_predict(_X)
-# print silhouette_score(_X, km_label)
+_X = epsg3857_X
+km_label = KMeans(n_clusters=k).fit_predict(_X)
+print silhouette_score(_X, km_label)
 # sp_label = SpectralClustering(n_clusters=k).fit_predict(_X)
 # print silhouette_score(_X, sp_label)
 # hac_label = AgglomerativeClustering(n_clusters=k).fit_predict(_X)
 # print silhouette_score(_X, hac_label)
-db_label = DBSCAN(eps=0.42, min_samples=19).fit_predict(_X)
-print silhouette_score(_X, db_label)
+# db_label = DBSCAN(eps=800, min_samples=19).fit_predict(_X)
+# print silhouette_score(_X, db_label)
 
 
-# max_sc = 0.
+
+# print len(set(db_label))
+# cls_size = []
+# for l in set(db_label):
+#     cls_size.append(db_label.tolist().count(l))
+# print cls_size
+
+# max_sc = -3.
 # max_eps = 0.
 # max_minsample = 0
 # max_k = -1 
-# for i in xrange(42, 43):
-#     for ms in xrange(20, 25):
+# for i in xrange(1, 10):
+#     for ms in xrange(2, 19):
 #         print '====================='
-#         print 'eps=%f, min_sample=%f'%(i*0.01, ms)
-#         db_label = DBSCAN(eps=.01 * i, min_samples=ms).fit_predict(_X)
+#         print 'eps=%f, min_sample=%f'%(i*0.0000002, ms)
+#         db_label = DBSCAN(eps=.0000002 * i, min_samples=ms).fit_predict(_X)
 #         sc = silhouette_score(_X, db_label)
 #         k = (len(set(db_label)) - (0 if -1 not in db_label else 1))
 #         print "silhouette score = %f"%sc
@@ -151,18 +158,37 @@ print silhouette_score(_X, db_label)
 # print "++++++++++++++++++++++++++++"
 # print "eps=%f; min_sample=%d; k=%d; sc=%f"%(max_eps, max_minsample, max_k, max_sc)
 
-# km_affi_mat = resort_affi(_X, km_label)
-# heatmap(km_affi_mat, 'Cate+KMeans')
-# print 'KMeans'
+def _scale(mat):
+    mean = mat.mean()
+    std_var = np.sqrt(mat.var())
+    for i in xrange(len(mat)):
+        for j in xrange(i+1, len(mat)):
+            if mat[i][j] > 2.5 * mean:
+                mat[i][j] = mat[j][i] = mean * 2.5
+    return mat
+
+km_affi_mat = resort_affi(_X, km_label)
+print 'min=%f'%km_affi_mat.min()
+print 'max=%f'%km_affi_mat.max()
+print 'mean=%f'%km_affi_mat.mean()
+print '>2.5*mean:%d'%len(km_affi_mat[km_affi_mat>2.5*km_affi_mat.mean()])
+heatmap(km_affi_mat, 'GeoM+KMeans')
+print 'KMeans'
 # sp_affi_mat = resort_affi(_X, sp_label)
-# heatmap(sp_affi_mat, 'Cate+Spectral')
+# sp_affi_mat = _scale(sp_affi_mat)
+# heatmap(sp_affi_mat, 'GeoM+Spectral')
 # print 'Spectral'
 # hac_affi_mat = resort_affi(_X, hac_label)
-# heatmap(hac_affi_mat, 'Cate+Hierarchical')
+# hac_affi_mat = _scale(hac_affi_mat)
+# heatmap(hac_affi_mat, 'GeoM+Hierarchical')
 # print 'Hierarchical'
+# db_affi_mat = resort_affi(_X, db_label)
+# db_affi_mat = _scale(db_affi_mat)
+# heatmap(db_affi_mat, 'GeoM+DB')
+# print 'DBSCAN'
 
-save_to_js(uids, db_label, X_latlon)
-save_3857_to_js(uids, db_label, epsg3857_X)
+# save_to_js(uids, db_label, X_latlon)
+# save_3857_to_js(uids, db_label, epsg3857_X)
 
 # scatter(epsg3857_X_all, km_label)
 
