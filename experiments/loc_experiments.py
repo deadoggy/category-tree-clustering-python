@@ -6,6 +6,7 @@ sys.path.append(sys.path[0] + '/../')
 from sklearn.cluster import *
 from data_loader.data_loader import DataLoader
 from data_loader.loc_data_loader import LocDataLoader
+from dist.vectorized_user_cate_dist import vectorized_convertor
 import time
 import logging
 import numpy as np

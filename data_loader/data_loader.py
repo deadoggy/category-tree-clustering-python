@@ -102,9 +102,14 @@ class DataLoader:
         data_size = kwargs['data_size'] if kwargs.has_key('data_size') else float('inf')
         ret_data = [None for i in xrange(len(user_data.keys()))] if valid_uid is None else [None for i in xrange(len(valid_uid))]
 
+        print "size of valid users: %d"%len(valid_uid)
+
         for count, uid in enumerate(valid_uid):
             if count+1 > data_size:
                 break
+            
+            if count % 10000==0:
+                print count
             bus_dict = {}
             for bid in user_data[uid]:
                 bus_dict[bid] = self.get_business_cate_path(bid)
