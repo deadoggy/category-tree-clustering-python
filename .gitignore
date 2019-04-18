@@ -8,3 +8,4 @@ distance_1*
 *.png
 result/*
 icmeRes/*
+.vscode/*
