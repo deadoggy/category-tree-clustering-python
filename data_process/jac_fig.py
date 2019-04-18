@@ -62,16 +62,15 @@ non_x_labels = [" "," "," "," "," "," "," "," "," "," "," "," "," "," "," ",]
 
 
 fig = plt.figure()
-ax1 = plt.subplot2grid((2, 6), (0, 0), colspan=2)
-ax2 = plt.subplot2grid((2, 6), (0, 2), colspan=2)
-ax3 = plt.subplot2grid((2, 6), (0, 4), colspan=2)
-ax4 = plt.subplot2grid((2, 6), (1, 1), colspan=2)
-ax5 = plt.subplot2grid((2, 6), (1, 3), colspan=2)
+ax1 = plt.subplot2grid((1, 8), (0, 0), colspan=2)
+ax2 = plt.subplot2grid((1, 8), (0, 2), colspan=2)
+ax3 = plt.subplot2grid((1, 8), (0, 4), colspan=2)
+ax4 = plt.subplot2grid((1, 8), (0, 6), colspan=2)
 
-axs = [ax1, ax2, ax3, ax4, ax5]
+axs = [ax1, ax2, ax3, ax4,]
 
 fig.set_figwidth(18)
-fig.set_figheight(10)
+fig.set_figheight(5.5)
 
 formatter = ticker.ScalarFormatter(useMathText=True)
 formatter.set_scientific(True) 
@@ -80,18 +79,19 @@ formatter.set_powerlimits((-1,1))
 for i, ax in enumerate(axs):
     if i>=len(vec_stat):
         continue
-    y_step = int(max(vec_stat[i])/10)
+    y_step = int(max(vec_stat[i+1])/10)
     y_label = [ j*y_step for j in xrange(10)]
-    ax.bar(x_keys,vec_stat[i], width=-1., align='edge', color='#696969', edgecolor='#ffffff')
+    ax.bar(x_keys,vec_stat[i+1], width=-1., align='edge', color='#696969', edgecolor='#ffffff')
     # if i > 2:
     #     ax.set_xlabel('jaccard similarity', fontsize=13)
-    ax.text(x=x_keys[-6], y=max(vec_stat[i])*0.7, s=r"$\sigma$: %.4f"%sigmas[i], fontsize=25)
+    ax.text(x=x_keys[-6], y=max(vec_stat[i+1])*0.7, s=r"$\sigma$: %.4f"%sigmas[i+1], fontsize=18)
     ax.set_ylabel('average vuc distance',fontsize=14)
     ax.set_yticklabels(y_label, fontsize=15)
-    if i> 2:
-        ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right", fontsize=14)
-    else:
-        ax.set_xticklabels(non_x_labels)
+    ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right", fontsize=11)
+    # if i> 2:
+    #     ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right", fontsize=14)
+    # else:
+    #     ax.set_xticklabels(non_x_labels)
     ax.yaxis.set_major_formatter(formatter)
 
 plt.tight_layout()

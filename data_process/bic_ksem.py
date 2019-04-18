@@ -8,17 +8,22 @@ from matplotlib import ticker
 log_type = "test"
 upper_bound = 14    
     
-#log_pattern = "<(.*?)> k:(.*?) distance:eul sc:(.*?) mse:(.*?) cls:"
+# log_pattern = "<(.*?)> k:(.*?) distance:eul sc:(.*?) mse:(.*?) cls:"
     
-log_pattern = "k:(.*?); dataset:.*?; alg:(.*?); distance_type:vec; runtime:.*?; sc:(.*?); mse:(.*?); rand:(.*?); size.*?\n"
+log_pattern = "k:(.*?); dataset:.*?; alg:(.*?); distance_type:vec; runtime:.*?; sc:(.*?); mae:(.*?); rand:(.*?); size.*?\n"
 
-file_names = [
-"/log/ctclog/2018-12-18_besttestdata3000_quality_exp.log.0.003",
-"/log/ctclog/2018-12-18_besttestdata3000_quality_exp.log.0.004",
-"/log/ctclog/2018-12-18_besttestdata3000_quality_exp.log.0.005"]
+# file_names = [
+# "/log/ctclog/2018-12-18_besttestdata3000_quality_exp.log.0.003",
+# "/log/ctclog/2018-12-18_besttestdata3000_quality_exp.log.0.004",
+# "/log/ctclog/2018-12-18_besttestdata3000_quality_exp.log.0.005"]
 
 # file_names = ["/log/ctclog/2018-12-18_besttestdata3000_quality_exp.log.stdvar.0.0002538195462258292",
 # "/log/ctclog/2018-12-18_besttestdata3000_quality_exp.log.std_var"]
+
+file_names = [
+    "/log/ctclog/2018-11-27_besttestdata3000_quality_exp_0.003.log",
+    "/log/ctclog/2018-11-27_testdata3000_quality_exp_0.003.log"
+]
 
     
 arr_xy = [
@@ -39,8 +44,8 @@ k_txt = [
 ]
 
 fig_txt = [
-    'Global Variance: 0.00025',
-    'Each Dimension Variance'
+    'Dataset #1',
+    'Dataset #2'
 ]
 
 # fig_txt = [
@@ -50,12 +55,12 @@ fig_txt = [
 # ]
 
 fig_txt_loc = [
-    [0.18, 0.],
-    [0.65, 0.],
+    [0.20, 0.],
+    [0.70, 0.],
 ]
 
-fig,axes = plt.subplots(4,2)
-fig.set_size_inches(12, 9)
+fig,axes = plt.subplots(2,2)
+fig.set_size_inches(12, 5.5)
 
 def drawinternal(fig, axes, col, file_name, fig_txt, fig_txt_loc, arr_xy, marr_xy, text_xy, k_txt, idx):
     log_f = open(file_name)
@@ -97,12 +102,13 @@ def drawinternal(fig, axes, col, file_name, fig_txt, fig_txt_loc, arr_xy, marr_x
         log_data[alg]["sc"].append(sc)
         log_data[alg]["mse"].append(mae)
     
-    k = range(2, 7)
+    k = range(2, 100)
     sc_y = [i*0.05 for i in range(0, 20)]
     mse_y = range(0, 40000, 2500)
     
     
-    title_keys = ["kmeans", "spectral", "covertree", "hierarchical"]
+    #title_keys = ["kmeans", "spectral", "covertree", "hierarchical"]
+    title_keys = ["kmeans"]
     fig.text(fig_txt_loc[0], fig_txt_loc[1], fig_txt, fontsize=16)
     for index, alg in enumerate(title_keys):
         if alg=='spectral':
@@ -115,18 +121,18 @@ def drawinternal(fig, axes, col, file_name, fig_txt, fig_txt_loc, arr_xy, marr_x
             title = 'PurTreeClust'
         sc_ax  = axes[index][col]
         mse_ax = sc_ax.twinx()
-        sc_ax.set_title(title, fontsize=10)
-        mse_ax.set_title(title, fontsize=10)
+        # sc_ax.set_title(title, fontsize=10)
+        # mse_ax.set_title(title, fontsize=10)
         # sc_ax.spines['top'].set_visible(False)  #去掉上边框
         # sc_ax.spines['right'].set_visible(False) #去掉右边框
         mse_ax.spines['top'].set_visible(False)  #去掉上边框
         # mse_ax.spines['right'].set_visible(False) #去掉右边框
         sc_ax.grid('true', linestyle=":", linewidth=0.7)
         mse_ax.grid('true', linestyle=":", linewidth=0.7)
-        # sc_ax.set_xlabel("k", fontsize=5)
-        # sc_ax.set_ylabel("SC", fontsize=6)
+        sc_ax.set_xlabel("k", fontsize=11)
+        sc_ax.set_ylabel("SC", fontsize=10)
         # mse_ax.set_xlabel("k", fontsize=5)
-        # mse_ax.set_ylabel("MSE", fontsize=6)
+        mse_ax.set_ylabel("MSE", fontsize=10)
     
         sc_ax.set_xticks(k)
         sc_ax.set_yticks(sc_y)
@@ -140,12 +146,12 @@ def drawinternal(fig, axes, col, file_name, fig_txt, fig_txt_loc, arr_xy, marr_x
         if idx==0 and index==0:
             sc_ax.legend(loc='upper right', bbox_to_anchor=(0.1, 1.18),
                ncol=1, mode=None, borderaxespad=0., frameon=False , fontsize=12)
-        # sc_ax.annotate('peek', xy=arr_xy[index], xytext=text_xy[index][1], fontsize = 13,
-        #         arrowprops=dict(facecolor='black', shrink=0.05, width=0, headwidth=0),
-        #         )
-        # sc_ax.annotate('knee', xy=marr_xy[index], xytext=text_xy[index][0], fontsize = 13,
-        #         arrowprops=dict(facecolor='black', shrink=0.05, width=0, headwidth=1),
-        #         )
+        sc_ax.annotate('peek', xy=arr_xy[index], xytext=text_xy[index][1], fontsize = 13,
+                arrowprops=dict(facecolor='black', shrink=0.05, width=0, headwidth=0),
+                )
+        sc_ax.annotate('knee', xy=marr_xy[index], xytext=text_xy[index][0], fontsize = 13,
+                arrowprops=dict(facecolor='black', shrink=0.05, width=0, headwidth=1),
+                )
         mse_ax.plot(np.array(k[0:upper_bound]), np.array(log_data[alg]['mse'][0:upper_bound]), "k:X", linewidth = 1.5, markeredgewidth=0.5, label='MSE')
         mse_ax.yaxis.set_major_formatter(formatter) 
         if idx==0 and index==0:
@@ -153,13 +159,13 @@ def drawinternal(fig, axes, col, file_name, fig_txt, fig_txt_loc, arr_xy, marr_x
                ncol=1, mode=None, borderaxespad=0., frameon=False , fontsize=12)        
 
 for i in xrange(0,2):
-    drawinternal(fig, axes, i, file_names[i], fig_txt[i], fig_txt_loc[i], arr_xy[0], marr_xy[0], text_xy[0], k_txt[0], i)
+    drawinternal(fig, axes, i, file_names[i], fig_txt[i], fig_txt_loc[i], arr_xy[i], marr_xy[i], text_xy[i], k_txt[i], i)
 
-plt.tight_layout()
-plt.show()
+# plt.tight_layout()
+# plt.show()
 
-fig,axes = plt.subplots(4,2)
-fig.set_size_inches(12, 9)
+# fig,axes = plt.subplots(2,2)
+# fig.set_size_inches(12, 5.5)
 
 # file_names = ["/log/ctclog/2018-12-18_besttestdata3000_quality_exp.log.stdvar.0.0002538195462258292",
 # "/log/ctclog/2018-12-18_besttestdata3000_quality_exp.log.std_var"]
@@ -173,9 +179,14 @@ text_xy = [
     [(5,0.6), (5,0.6),  (4,0.6), (5,0.6)],
     [(4,0.46), (4,0.46),  (11,20.25), (10,10.6)]
 ]
+# k_txt = [
+#     ['4; ARI=0.86','4; ARI=0.86', '4;ARI>0.95', '4; ARI=0.84'],
+#     ['4; ARI=0.81','4; ARI=0.80', '', '']
+# ]
+
 k_txt = [
-    ['4; ARI=0.86','4; ARI=0.86', '4;ARI>0.95', '4; ARI=0.84'],
-    ['4; ARI=0.81','4; ARI=0.80', '', '']
+    ['4; ARI=0.86','4; ARI=0.86'],
+    ['4; ARI=0.81','4; ARI=0.80']
 ]
 
 # fig_txt = [
@@ -221,11 +232,12 @@ def draw_ri(fig, axes, col, file_name, fig_txt, fig_txt_loc, arr_xy, marr_xy, te
         rand = float(rec[4])
         log_data[alg]["rand"].append(rand)
     
-    k = range(2, 7)
+    k = range(2, 100)
     rand_y = [i*0.05 for i in range(0, 20)]
     
-    title_keys = ["kmeans", "spectral", "covertree", "hierarchical"]
-    fig.text(fig_txt_loc[0], fig_txt_loc[1], fig_txt, fontsize=15)
+    #title_keys = ["kmeans", "spectral", "covertree", "hierarchical"]
+    title_keys = ["kmeans"]
+    # fig.text(fig_txt_loc[0], fig_txt_loc[1], fig_txt, fontsize=15)
     for index, alg in enumerate(title_keys):
         if alg=='spectral':
             title = 'Spectral'
@@ -235,8 +247,8 @@ def draw_ri(fig, axes, col, file_name, fig_txt, fig_txt_loc, arr_xy, marr_xy, te
             title = 'Kmeans'
         else:
             title = 'PurTreeClust'
-        rand_ax  = axes[index][col]
-        rand_ax.set_title(title, fontsize=13)
+        rand_ax  = axes[index+1][col]
+        # rand_ax.set_title(title, fontsize=13)
         rand_ax.grid('true', linestyle=":", linewidth=0.7)
         rand_ax.set_xlabel("k", fontsize=11)
     
@@ -247,11 +259,14 @@ def draw_ri(fig, axes, col, file_name, fig_txt, fig_txt_loc, arr_xy, marr_xy, te
         rand_ax.plot(np.array(k[0:upper_bound]), np.array(log_data[alg]['rand'][0:upper_bound]), "k-o", linewidth = 1.5, markeredgewidth=0.5, label='ARI')
         rand_ax.legend(loc='upper right', bbox_to_anchor=(0.1, 1.18),
                ncol=1, mode=None, borderaxespad=0., frameon=False , fontsize=12)
-        # rand_ax.annotate('k='+k_txt[index], xy=arr_xy[index], xytext=text_xy[index], fontsize = 13,
-        #         arrowprops=dict(facecolor='black', shrink=0.05, width=0, headwidth=0),
-        #         )
+        rand_ax.annotate('k='+k_txt[index], xy=arr_xy[index], xytext=text_xy[index], fontsize = 13,
+                arrowprops=dict(facecolor='black', shrink=0.05, width=0, headwidth=0),
+                )
 for i in xrange(0,2):
-    draw_ri(fig, axes, i, file_names[i], fig_txt[i], fig_txt_loc[i], arr_xy[0], marr_xy[0], text_xy[0], k_txt[0])
+    draw_ri(fig, axes, i, file_names[i], fig_txt[i], fig_txt_loc[i], arr_xy[i], marr_xy[i], text_xy[i], k_txt[i])
+
+
+
 
 plt.tight_layout()
 plt.show()
