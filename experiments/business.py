@@ -9,7 +9,7 @@ from data_loader.data_loader import DataLoader
 from dist.vectorized_user_cate_dist import *
 from pyproj import Proj, transform
 from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_score, mean_squared_error
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 import json
@@ -108,6 +108,17 @@ def generate_geom_vec():
         shopvec[bid] = [x, y]
     return shopvec
 
+def mse(y_predict, data, k):
+    d = len(vec[0])
+    clusters_centers = [ np.array(np.zeros(d)) for i in xrange(k) ]
+    clusters_count = [ 0 for i in xrange(k) ]
+    for i, cls_i in enumerate(y_predict):
+            if -1 != cls_i:
+                clusters_centers[cls_i] += np.array(data[i])
+                clusters_count[cls_i] += 1
+    for i, ctr in enumerate(clusters_centers):
+        clusters_centers[i] = ctr/clusters_count[i]
+    return mean_squared_error([ clusters_centers[i] for i in y_predict ], data)
 
 print "Generating GeoG Vectors..."
 geog_data = generate_geog_vec()
@@ -129,12 +140,13 @@ print vec
 print "KMeans..."
 #KMeans 
 top_k = int(np.sqrt(len(vec)))
-sc_vals = []
+print top_k
+mse_vals = []
 for k in xrange(2, top_k):
-    label = KMeans(n_clusters=k).fit_predict()
-    sc = silhouette_score(vec, label)
-    print "k=%d, sc=%f"%(k, sc)
-    sc_vals.append(sc)
+    label = KMeans(n_clusters=k).fit_predict(vec)
+    mse = mse(label, vec, k)
+    print "k=%d, mse=%f"%(k, mse)
+    mse_vals.append(mse)
 
-plt.plot(range(2, top_k), sc_vals)
-plt.savefig("geog+geom.png")
+plt.plot(range(2, top_k), mse_vals)
+plt.savefig("geog+geom+mse.png")
