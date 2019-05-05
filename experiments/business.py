@@ -244,16 +244,22 @@ vec = np.concatenate((geog_vec, geom_vec), axis=1)
 # with open('km_db_label.json', 'w') as kmdb_out:
 #     json.dump({'kmeans': km_label.tolist(), 'dbscan': db_label.tolist()}, kmdb_out)
 
+# generate kdtree
+n_samples = len(vec)
+leaf_size = int(n_samples/2+1)
+tree = KDTree(ori_geom_vec, leaf_size=leaf_size)
 
 # generate checkin and rate data
 checkin_data = np.array(generate_checkin().values())
 rate_data = np.array(generate_rate().values())
 cate_data = np.array(generate_cate_vec().values())
+ngb_cate_data = np.array( [ 
+    np.array([
+        cate_data[i] for i in tree.query_radius(ori_geom_vec[idx:idx+1], r=RADIUS)[0]
+    ])  
+    for idx in xrange(len(ori_geom_vec)) 
+] )
 
-# generate kdtree
-n_samples = len(vec)
-leaf_size = int(n_samples/2+1)
-tree = KDTree(ori_geom_vec, leaf_size=leaf_size)
 
 # generate average category number in RADIUS
 def generate_catengb_mat():
@@ -262,8 +268,7 @@ def generate_catengb_mat():
     catengb_cnt_mat = np.zeros((dim, dim))
 
     for idx in xrange(len(ori_geom_vec)):
-        ngb_idx = tree.query_radius(ori_geom_vec[idx:idx+1], r=RADIUS)[0]
-        ngb_cate_arr = np.array([ cate_data[i] for i in ngb_idx ])
+        ngb_cate_arr = ngb_cate_data[idx]
         cate_arr = cate_data[idx]
 
         for dr in xrange(dim):
@@ -279,25 +284,69 @@ def generate_catengb_mat():
 
 avg_catengb_data = generate_catengb_mat()
 
+def cal_k_beta(beta_idx, gamma_idx):
+    N = len(ori_geog_vec)
+    beta_col = cate_data[:,beta_idx]
+    N_beta = beta_col[beta_col!=0.].shape[0]
+    gamma_col = cate_data[:, gamma_idx]
+    N_gamma = gamma_col[gamma_col!=0.].shape[0]
+
+    tmp_sum = 0.
+    for p in xrange(len(cate_data)):
+        if cate_data[p][beta_idx] != 0.:
+            p_ngb = ngb_cate_data[p]
+            Np = len(p_ngb)
+            p_gamma_col = p_ngb[:, gamma_idx]
+            Np_gamma = p_gamma_col[p_gamma_col!=0.].shape[0]
+            p_beta_col = p_ngb[:, beta_idx]
+            Np_beta = p_beta_col[p_beta_col!=0.].shape[0]
+            tmp_sum += Np_gamma / (Np - Np_beta)
+    
+    return tmp_sum * (N - N_beta) / (N_beta * N_gamma)
+
 def cal_geo_features(idx):
     dim = cate_data.shape[1]
-    ngb_idx = tree.query_radius(ori_geom_vec[idx:idx+1], r=RADIUS)[0]
-    ngb_cate_arr = np.array([ cate_data[i] for i in ngb_idx ])
+    ngb_cate_arr = ngb_cate_data[idx]
     
     #f_{r}^D
-    frd = len(ngb_idx)
+    frd = len(ngb_cate_arr.shape[0])
 
     #f_{r}^{NE}
     frNE = 0.
-    for d in dim:
-        Nc = ngb_cate_arr[ngb_cate_arr[d]!=0.].shape[0]
+    for d in xrange(dim):
+        col = ngb_cate_arr[:,d]
+        Nc = col[col!=0.].shape[0]
         if Nc != 0.:
             frNE += -1. * (Nc/frd) * np.log(Nc/frd)
     
     #f_{r}^{Com}
     frCom = ngb_cate_arr[np.sum(ngb_cate_arr * cate_data[idx]) != 0.].shape[0] / frd
 
-    return 
+    #f_{r}^{QJ}
+    frQJ = 0.
+    for d_gamma in xrange(dim): 
+        if cate_data[idx][d_gamma] != 0.:
+            for d_beta in xrange(dim):
+                col = ngb_cate_arr[:, d_beta]
+                N_beta = col[col!=0.].shape[0]
+                N_beta_avg = avg_catengb_data[d_gamma, d_beta]
+                k_beta_gamma = cal_k_beta(d_beta, d_gamma)
+                frQJ += np.log(k_beta_gamma) * (N_beta - N_beta_avg)
+    
+    #f_{r}^{CD}
+    frCD = 0.
+    for d_gamma in xrange(dim):
+        if cate_data[idx][d_gamma] != 0.:
+            col = ngb_cate_arr[:, d_gamma]
+            N_gamma = col[col!=0.].shape[0]
+            for d_beta in xrange(dim):
+                col = ngb_cate_arr[:, d_beta]
+                N_beta = col[col!=0.].shape[0]
+                N_gamma_avg = avg_catengb_data[d_beta, d_gamma]
+                N = frd
+                frCD += N_beta * N_gamma_avg / (N * N_gamma)
 
+    return np.array([ frd, frNE, frCom, frQJ, frCD ])
+                
 def cal_mob_features(bid):
     pass
