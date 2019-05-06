@@ -375,8 +375,6 @@ geo_features_list = []
 for bidx in xrange(len(ori_geog_vec)):
 
     print bidx
-    if bidx == 3:
-        break
     try:
         geo_feature = cal_geo_features(bidx)
         mob_feature = cal_mob_features(bidx)
