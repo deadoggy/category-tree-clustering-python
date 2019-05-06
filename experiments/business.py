@@ -1,5 +1,5 @@
 #coding:utf-8
-
+from __future__ import division
 import sys
 sys.path.append(sys.path[0] + "/../")
 from config.load_config import Config
@@ -260,6 +260,13 @@ ngb_cate_data = np.array( [
     for idx in xrange(len(ori_geom_vec)) 
 ] )
 
+ngb_ckin_data = np.array( [ 
+    np.array([
+        checkin_data[i] for i in tree.query_radius(ori_geom_vec[idx:idx+1], r=RADIUS)[0]
+    ])  
+    for idx in xrange(len(ori_geom_vec)) 
+] )
+
 
 # generate average category number in RADIUS
 def generate_catengb_mat():
@@ -300,7 +307,7 @@ def cal_k_beta(beta_idx, gamma_idx):
             Np_gamma = p_gamma_col[p_gamma_col!=0.].shape[0]
             p_beta_col = p_ngb[:, beta_idx]
             Np_beta = p_beta_col[p_beta_col!=0.].shape[0]
-            tmp_sum += Np_gamma / (Np - Np_beta)
+            tmp_sum += Np_gamma / (Np - Np_beta) if Np != Np_beta else 0.
     
     return tmp_sum * (N - N_beta) / (N_beta * N_gamma)
 
@@ -309,7 +316,7 @@ def cal_geo_features(idx):
     ngb_cate_arr = ngb_cate_data[idx]
     
     #f_{r}^D
-    frd = len(ngb_cate_arr.shape[0])
+    frd = ngb_cate_arr.shape[0]
 
     #f_{r}^{NE}
     frNE = 0.
@@ -331,7 +338,8 @@ def cal_geo_features(idx):
                 N_beta = col[col!=0.].shape[0]
                 N_beta_avg = avg_catengb_data[d_gamma, d_beta]
                 k_beta_gamma = cal_k_beta(d_beta, d_gamma)
-                frQJ += np.log(k_beta_gamma) * (N_beta - N_beta_avg)
+                if k_beta_gamma != 0.:
+                    frQJ += np.log(k_beta_gamma) * (N_beta - N_beta_avg)
     
     #f_{r}^{CD}
     frCD = 0.
@@ -344,9 +352,37 @@ def cal_geo_features(idx):
                 N_beta = col[col!=0.].shape[0]
                 N_gamma_avg = avg_catengb_data[d_beta, d_gamma]
                 N = frd
-                frCD += N_beta * N_gamma_avg / (N * N_gamma)
+                frCD += N_beta * N_gamma_avg / float(N * N_gamma)
 
     return np.array([ frd, frNE, frCom, frQJ, frCD ])
                 
-def cal_mob_features(bid):
-    pass
+def cal_mob_features(idx):
+    ngb_ckin_arr = ngb_ckin_data[idx]
+    
+    # f_r^{AP2}
+    frAP = np.sum(ngb_ckin_arr)
+
+
+    return np.array([frAP])
+
+def save_features(features):
+    size = len(features)
+    with open('/data/dataset/processed/business_exp_features_%d.json'%size, 'w') as out:
+        json.dump(features, out)
+
+geo_features_list = []
+
+for bidx in xrange(len(ori_geog_vec)):
+
+    print bidx
+    if bidx == 3:
+        break
+    try:
+        geo_feature = cal_geo_features(bidx)
+        mob_feature = cal_mob_features(bidx)
+        geo_features_list.append(np.concatenate((geo_feature, mob_feature), axis=0).tolist())
+    except Exception, e:
+        save_features(geo_features_list)
+
+
+save_features(geo_features_list)
