@@ -13,6 +13,10 @@ from sklearn.metrics import silhouette_score, mean_squared_error
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import KDTree
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import KFold
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestRegressor
 import json
 import numpy as np
 
@@ -21,6 +25,17 @@ PATH_BEG_OFFSET = 0
 PATH_END_PFFSET = 1
 GAUSSIAN_SIGMA = 0.
 RADIUS = 200
+
+distance_type = sys.argv[1]
+cluster_algorithm = sys.argv[2]
+max_ngb = 100
+
+# KMeans arg
+kmeans_k = 15
+
+# DBSCAN arg
+dbscan_eps = 0.01
+dbscan_minpts = 24
 
 # u'CorrByydi35r-6SvmhYFHA'
 exception_bid = [
@@ -165,7 +180,12 @@ minmaxscaler = MinMaxScaler()
 geog_vec = minmaxscaler.fit_transform(ori_geog_vec)
 geom_vec = minmaxscaler.fit_transform(ori_geom_vec)
 
-vec = np.concatenate((geog_vec, geom_vec), axis=1)
+if distance_type=='GeoM':
+    vec = geom_vec
+elif distance_type=='GeoG':
+    vec = geog_vec
+elif distance_type=='GeoM':
+    vec = np.concatenate((geog_vec, geom_vec), axis=1)
 
 # print vec
 
@@ -186,24 +206,6 @@ vec = np.concatenate((geog_vec, geom_vec), axis=1)
 
 
 # print "DBSCAN..."
-
-# n_samples = len(vec)
-# leaf_size = int(n_samples/2+1)
-
-# tree = KDTree(vec, leaf_size=leaf_size)
-
-# dist_array = []
-
-# for i in xrange(len(vec)):
-#     if i%100==0:
-#         print i
-#     dist, ind = tree.query(vec[i:i+1], k=50)
-#     dist_array.append(dist[0][2])
-
-# dist_array = sorted(dist_array)
-
-# plt.plot(range(len(dist_array)), dist_array)
-# plt.show()
 
 # step_eps = 0.01
 # min_pts= 5
@@ -244,31 +246,76 @@ vec = np.concatenate((geog_vec, geom_vec), axis=1)
 # with open('km_db_label.json', 'w') as kmdb_out:
 #     json.dump({'kmeans': km_label.tolist(), 'dbscan': db_label.tolist()}, kmdb_out)
 
+if cluster_algorithm=='kmeans':
+    print 'kmeans'
+    ngb_label = KMeans(n_clusters=kmeans_k).fit_predict(vec)
+elif cluster_algorithm=='dbscan':
+    print 'dbscan'
+    ngb_label = dbscan(vec, eps=dbscan_eps, min_samples=dbscan_minpts)[1]
+
+
 # generate kdtree
-n_samples = len(vec)
-leaf_size = int(n_samples/2+1)
-tree = KDTree(ori_geom_vec, leaf_size=leaf_size)
+# n_samples = len(vec)
+# leaf_size = int(n_samples/2+1)
+# tree = KDTree(ori_geom_vec, leaf_size=leaf_size)
 
 # generate checkin and rate data
+print 'generating features'
+print 'checkin data'
 checkin_data = np.array(generate_checkin().values())
+print 'rate data'
 rate_data = np.array(generate_rate().values())
+print 'cate data'
 cate_data = np.array(generate_cate_vec().values())
-ngb_cate_data = np.array( [ 
-    np.array([
-        cate_data[i] for i in tree.query_radius(ori_geom_vec[idx:idx+1], r=RADIUS)[0]
-    ])  
-    for idx in xrange(len(ori_geom_vec)) 
-] )
 
-ngb_ckin_data = np.array( [ 
-    np.array([
-        checkin_data[i] for i in tree.query_radius(ori_geom_vec[idx:idx+1], r=RADIUS)[0]
-    ])  
-    for idx in xrange(len(ori_geom_vec)) 
-] )
+# ngb_cate_data = np.array( [ 
+#     np.array([
+#         cate_data[i] for i in tree.query_radius(ori_geom_vec[idx:idx+1], r=RADIUS)[0]
+#     ])  
+#     for idx in xrange(len(ori_geom_vec)) 
+# ] )
 
+# ngb_ckin_data = np.array( [ 
+#     np.array([
+#         checkin_data[i] for i in tree.query_radius(ori_geom_vec[idx:idx+1], r=RADIUS)[0]
+#     ])  
+#     for idx in xrange(len(ori_geom_vec)) 
+# ] )
 
-# generate average category number in RADIUS
+print 'ngb_cate_data..'
+
+cls_idx = {}
+for l in set(ngb_label):
+    cls_idx[l] = np.argwhere(ngb_label == l).T[0]
+
+# ngb_cate_data = np.array( [ 
+#     cate_data[cls_idx[ngb_label[idx]]]  
+#         for idx in xrange(len(ori_geom_vec)) 
+# ] )
+
+# print 'ngb_chin_data'
+# ngb_ckin_data = np.array( [ 
+#     checkin_data[cls_idx[ngb_label[idx]]]
+#         for idx in xrange(len(ori_geom_vec)) 
+# ] )
+
+def generate_ngb_cache():
+    ngb_cate_data = []
+    ngb_ckin_data = []
+    for idx in xrange(len(vec)):
+        print idx
+        ind = np.array([ i for i in xrange(len(vec))])
+        if cls_idx[ngb_label[idx]].shape[0] > max_ngb:
+            tree = KDTree(vec[cls_idx[ngb_label[idx]]], leaf_size=len(cls_idx[ngb_label[idx]])/2. + 1)
+            ind = tree.query(vec[idx:idx+1], max_ngb)[1][0]
+        ngb_cate_data.append(cate_data[ind])
+        ngb_ckin_data.append(checkin_data[ind])
+    
+    return np.array(ngb_cate_data),  np.array(ngb_ckin_data)
+
+ngb_cate_data, ngb_ckin_data = generate_ngb_cache()
+
+#generate average category number in RADIUS
 def generate_catengb_mat():
     dim = cate_data.shape[1]
     catengb_mat = np.zeros((dim, dim))
@@ -367,11 +414,10 @@ def cal_mob_features(idx):
 
 def save_features(features):
     size = len(features)
-    with open('/data/dataset/processed/business_exp_features_%d.json'%size, 'w') as out:
+    with open('/data/dataset/processed/business_exp_features_%s_%s.json'%(distance_type, cluster_algorithm), 'w') as out:
         json.dump(features, out)
 
 geo_features_list = []
-
 for bidx in xrange(len(ori_geog_vec)):
 
     print bidx
@@ -381,6 +427,69 @@ for bidx in xrange(len(ori_geog_vec)):
         geo_features_list.append(np.concatenate((geo_feature, mob_feature), axis=0).tolist())
     except Exception, e:
         save_features(geo_features_list)
-
-
 save_features(geo_features_list)
+
+# with open('/data/dataset/processed/business_exp_features_25221.json') as feature_in:
+#     features = json.load(feature_in)
+
+# # kfold
+
+# X = np.concatenate((np.array(features), vec), axis=1)
+# minmaxscaler = MinMaxScaler()
+# X = minmaxscaler.fit_transform(X)
+# Y = rate_data 
+
+# kf = KFold(n_splits=5, shuffle=True)
+
+# print '\nLinear Regression\n=========='
+# average_loss = 0.
+# k = 0
+# for train_idx, test_idx in kf.split(X):
+#     k += 1
+#     X_train, X_test = X[train_idx], X[test_idx]
+#     Y_train, Y_test = Y[train_idx], Y[test_idx]
+#     lnreg = LinearRegression(fit_intercept=True, normalize=True).fit(X_train, Y_train)
+#     Y_predict = lnreg.predict(X_test)
+#     loss = np.sum(np.abs(Y_predict - Y_test)) / Y_test.shape[0]
+#     average_loss += loss
+
+# average_loss /= k
+
+# print 'average_loss: %f'%average_loss
+
+# print '\nRF Regression\n=========='
+# average_loss = 0.
+# k=0
+# for train_idx, test_idx in kf.split(X):
+#     k += 1
+#     print k
+#     X_train, X_test = X[train_idx], X[test_idx]
+#     Y_train, Y_test = Y[train_idx], Y[test_idx]
+#     lnreg = RandomForestRegressor(max_depth=None, random_state=0, n_estimators=100).fit(X_train, Y_train)
+#     Y_predict = lnreg.predict(X_test)
+#     loss = np.sum(np.abs(Y_predict - Y_test)) / Y_test.shape[0]
+#     average_loss += loss
+
+# average_loss /= k
+
+# Y_label = Y.astype(int)
+
+# print 'average_loss: %f'%average_loss
+
+# print '\nSVM\n=========='
+# average_acc = 0.
+# k = 0
+# for train_idx, test_idx in kf.split(X):
+#     k += 1
+#     print k
+#     X_train, X_test = X[train_idx], X[test_idx]
+#     Y_train, Y_test = Y_label[train_idx], Y_label[test_idx]
+#     clf = SVC()
+#     clf.fit(X_train, Y_train)
+#     Y_predict = clf.predict(X_test)
+#     acc = np.sum(Y_predict == Y_test) / Y_test.shape[0]
+#     average_acc += acc
+# average_acc /= k
+# print 'average_acc: %f'%average_acc
+
+
