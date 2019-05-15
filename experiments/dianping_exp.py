@@ -192,18 +192,18 @@ Y_label = Y.astype(int)
 
 print 'average_loss: %f'%average_loss
 
-print '\nSVM\n=========='
-average_acc = 0.
-k = 0
-for train_idx, test_idx in kf.split(X):
-    k += 1
-    print k
-    X_train, X_test = X[train_idx], X[test_idx]
-    Y_train, Y_test = Y_label[train_idx], Y_label[test_idx]
-    clf = SVC()
-    clf.fit(X_train, Y_train)
-    Y_predict = clf.predict(X_test)
-    acc = np.sum(Y_predict == Y_test) / Y_test.shape[0]
-    average_acc += acc
-average_acc /= k
-print 'average_acc: %f'%average_acc
+# print '\nSVM\n=========='
+# average_acc = 0.
+# k = 0
+# for train_idx, test_idx in kf.split(X):
+#     k += 1
+#     print k
+#     X_train, X_test = X[train_idx], X[test_idx]
+#     Y_train, Y_test = Y_label[train_idx], Y_label[test_idx]
+#     clf = SVC()
+#     clf.fit(X_train, Y_train)
+#     Y_predict = clf.predict(X_test)
+#     acc = np.sum(Y_predict == Y_test) / Y_test.shape[0]
+#     average_acc += acc
+# average_acc /= k
+# print 'average_acc: %f'%average_acc

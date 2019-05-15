@@ -843,4 +843,6 @@ DBSCAN:
 best_k=55, best_eps=0.010000, best_minpts=24, best_mse=0.000032
 
 KMeans:
-best_k=15
+GeoM: best_k=15
+GeoG: best_k=50
+Both: best_k=50

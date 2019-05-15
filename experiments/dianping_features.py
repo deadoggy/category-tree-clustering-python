@@ -32,7 +32,7 @@ cluster_algorithm = sys.argv[2]
 max_ngb = 100
 
 # KMeans arg
-kmeans_k = 15
+kmeans_k = 50
 
 # DBSCAN arg
 dbscan_eps = 0.01
@@ -184,17 +184,25 @@ geom_vec = minmaxscaler.fit_transform(ori_geom_vec)
 
 if distance_type=='GeoM':
     vec = geom_vec
+    kmeans_k = 15
+    dbscan_eps = 0.01
+    dbscan_minpts = 20
 elif distance_type=='GeoG':
     vec = geog_vec
+    kmeans_k = 55
+    dbscan_eps = 0.01
+    dbscan_minpts = 5
 elif distance_type=='Both':
     vec = np.concatenate((geog_vec, geom_vec), axis=1)
+    kmeans_k = 55
+    dbscan_eps = 0.01
+    dbscan_minpts = 24
 
-print(vec)
+# print(vec)
 
 
-#KMeans 
-#top_k = int(np.sqrt(len(vec)))
-# top_k = 40
+# #KMeans 
+# top_k = 120
 # print (top_k)
 # mse_vals = []
 # for k in xrange(2, top_k):
@@ -204,41 +212,41 @@ print(vec)
 #     mse_vals.append(mse)
 
 # plt.plot(range(2, top_k), mse_vals)
-# plt.savefig("geog+geom+mse.png")
+# plt.savefig("geog+mse.png")
+
+# exit()
+# print("DBSCAN...")
+
+# step_eps = 0.01
+# min_pts= 5
+# step_min_pts = 1
+
+# best_k = -1
+# best_eps = 0.01
+# best_minpts = 5
+# best_mse = np.inf
+
+# try:
+#     for i in xrange(1, 15):
+#         for j in xrange(20):
+#             print('eps=%f, minpts=%d'%(step_eps*i, min_pts + j*step_min_pts))
+#             label = dbscan(vec, eps=step_eps*i, min_samples=min_pts + j*step_min_pts)[1]
+#             tmp_k = len(set(label)) - 1 if -1 in label else 0
+#             tmp_mse = calmse(label, vec, tmp_k)
+#             print ('k=%d, mse=%f, noise=%d'%(tmp_k, tmp_mse, len(label[label==-1])))
+#             print ('=================================')
+#             if tmp_mse < best_mse:
+#                 best_mse = tmp_mse
+#                 best_k = tmp_k
+#                 best_eps = step_eps*i
+#                 best_minpts = min_pts + j*step_min_pts
+# except Exception, e:
+#     print (e.message)
+# finally:
+#     print ('best_k=%d, best_eps=%f, best_minpts=%d, best_mse=%f'%(best_k, best_eps, best_minpts, best_mse))
 
 
-print("DBSCAN...")
 
-step_eps = 0.01
-min_pts= 5
-step_min_pts = 1
-
-best_k = -1
-best_eps = 0.01
-best_minpts = 5
-best_mse = np.inf
-
-try:
-    for i in xrange(1, 2):
-        for j in xrange(19, 20):
-            print('eps=%f, minpts=%d'%(step_eps*i, min_pts + j*step_min_pts))
-            label = dbscan(vec, eps=step_eps*i, min_samples=min_pts + j*step_min_pts)[1]
-            tmp_k = len(set(label)) - 1 if -1 in label else 0
-            tmp_mse = calmse(label, vec, tmp_k)
-            print ('k=%d, mse=%f, noise=%d'%(tmp_k, tmp_mse, len(label[label==-1])))
-            print ('=================================')
-            if tmp_mse < best_mse:
-                best_mse = tmp_mse
-                best_k = tmp_k
-                best_eps = step_eps*i
-                best_minpts = min_pts + j*step_min_pts
-except Exception, e:
-    print (e.message)
-finally:
-    print ('best_k=%d, best_eps=%f, best_minpts=%d, best_mse=%f'%(best_k, best_eps, best_minpts, best_mse))
-
-
-exit()
 
 # print ('KMeans...')
 
