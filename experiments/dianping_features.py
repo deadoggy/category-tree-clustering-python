@@ -112,7 +112,7 @@ def generate_geog_vec():
                 shopvec[bid][idx] = np.exp(-(np.power(shopvec[bid][idx], 2.))/(2*GAUSSIAN_SIGMA**2))
     return shopvec
 
-def generate_geom_vec():
+def generate_geom_vec(to_convert=True):
     shopvec = {}
     with open("/data/shanghai_business_info.json") as din:
         datajson = json.load(din)
@@ -122,7 +122,10 @@ def generate_geom_vec():
             continue
         lat = datajson[bid]['latitude']
         lon = datajson[bid]['longitude']
-        x,y = lonlat_to_3857(lon, lat)
+        if to_convert:
+            x,y = lonlat_to_3857(lon, lat)
+        else:
+            x,y = lon, lat
         shopvec[bid] = [x, y]
     return shopvec
 
@@ -266,8 +269,14 @@ elif cluster_algorithm=='dbscan':
     print ('dbscan')
     ngb_label = dbscan(vec, eps=dbscan_eps, min_samples=dbscan_minpts)[1]
 
+lonlat = generate_geom_vec(to_convert=False)
 
+cls_res = {'data': lonlat, 'label':ngb_label.tolist()}
 
+with open('%s_%s_data.js'%(distance_type, cluster_algorithm), 'w') as fo:
+    content = 'var data = %s'%(str(cls_res))
+    fo.write(content)
+exit()
 # generate kdtree
 # n_samples = len(vec)
 # leaf_size = int(n_samples/2+1)
