@@ -296,6 +296,8 @@ def quality_experiments(dataset_name, k, algs=None, dists=None):
             if alg=='kmeans' and dist=='edit':
                 continue
             data, labels, run_time = algorithm_runner(alg, dist, valid_uid=valid_uid, k=k)
+            with open('data_vec', 'w') as data_out:
+                data_out.write(str(np.array(data).tolist()))
             if -1 == data and labels == -1 and run_time == -1:
                 logging.debug("in dataset:%s"%dataset_name)
                 continue
@@ -369,7 +371,7 @@ elif sys.argv[1] == 'quality':
     for dataset in [sys.argv[2]]:
         for k in xrange(2, 7):
             print "k:" + str(k)
-            quality_experiments(dataset, k, dists=['vec'], algs=["spectral", "hierarchical", "covertree", "kmeans"])
+            quality_experiments(dataset, k, dists=['vec'], algs=[ "spectral"])
         vec_data = None
         vec_X = None
         edit_data = None

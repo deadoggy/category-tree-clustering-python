@@ -31,8 +31,16 @@ class DataLoader:
                 raise e
         
         #load business's category info
-        with open(self.business_file_name) as businss_cate_json:
-            self.business_cate = json.load(businss_cate_json)
+        with open(self.business_file_name) as businss_cate_f:
+            if 'line' in self.business_file_name:
+                self.business_cate = {}
+                line = businss_cate_f.readline()
+                while line!='' and line!='\n':
+                    item = json.loads(line)
+                    self.business_cate[item['bid']] = item['category']
+                    line = businss_cate_f.readline()
+            else:
+                self.business_cate = json.load(businss_cate_f)
 
     def get_cate_list(self, cate):
         '''
@@ -94,8 +102,17 @@ class DataLoader:
         if type(convert_func).__name__ != 'function':
             raise Exception('convert_func must be a function')
         print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' begin loading...'
+        user_data = {}
+
         with open(self.data_file_name) as user_data_f:
-            user_data = json.load(user_data_f)
+            if 'line' in self.data_file_name:
+                line = user_data_f.readline()
+                while line!='' and line!='\n':
+                    item = json.loads(line)
+                    user_data[item['uid']] = item['business']
+                    line = user_data_f.readline()
+            else:
+                user_data = json.load(user_data_f)
         
         
         valid_uid = kwargs['valid_uid'] if kwargs.has_key('valid_uid') else user_data.keys()
@@ -107,7 +124,7 @@ class DataLoader:
         for count, uid in enumerate(valid_uid):
             if count+1 > data_size:
                 break
-            
+
             if count % 10000==0:
                 print count
             bus_dict = {}
