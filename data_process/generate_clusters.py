@@ -44,6 +44,8 @@ def cluster_convertor(uid, bus_cate_dict, kwargs):
     pivots = deepcopy(ori_pivots)
     for bid in bus_cate_dict:
         for cate_path in bus_cate_dict[bid]:
+            if not pivots.has_key(cate_path[0]):
+                pivots[cate_path[0]] = 0
             pivots[cate_path[0]] += 1
     return [ uid, pivots.values() ]
 
@@ -52,6 +54,11 @@ print "loading users"
 data = dataloader.load(cluster_convertor)
 
 print "loading users done"
+
+if len(data[0][1]) != AMAZON_DIMENSION:
+    AMAZON_DIMENSION = len(data[0][1])
+
+print AMAZON_DIMENSION if SOURCE_DATASET=='AMAZON' else YELP_DIMENSION
 
 # valid_user = random.sample(data, 5000) B007WZXQM0
 
@@ -64,7 +71,9 @@ dimension_cnt = []
 #         if u != valid_user[-1]:
 #             uid_out.write('\n')
 
-d_index = range(YELP_DIMENSION)
+
+
+d_index = range(AMAZON_DIMENSION)
 sizes = [200, 400, 100, 300, 800, 600, 750, 150, 900]
 
 print len(data)

@@ -129,7 +129,8 @@ class DataLoader:
                 print count
             bus_dict = {}
             for bid in user_data[uid]:
-                bus_dict[bid] = self.get_business_cate_path(bid)
+                if self.business_cate.has_key(bid):
+                    bus_dict[bid] = self.get_business_cate_path(bid) if 'line' not in self.business_file_name else self.business_cate[bid]
             index = count if len(valid_uid)==len(user_data) else valid_uid.index(uid)
             ret_data[index] = convert_func(uid, bus_dict, kwargs)
         print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' loading finished'
