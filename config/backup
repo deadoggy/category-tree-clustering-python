@@ -1,0 +1,9 @@
+Amazon:
+    "data_file_name":"/data/rec_dataset/amazon/amazon_user_business_line.json",
+    "cate_file_name":"/data/rec_dataset/yelp/processed/category/aliasToParents.csv",
+    "business_file_name": "/data/rec_dataset/amazon/amazon_business_category_line.json",
+
+Yelp:
+    "data_file_name":"/data/rec_dataset/yelp/processed/user_business.json",
+    "cate_file_name":"/data/rec_dataset/yelp/processed/category/aliasToParents.csv",
+    "business_file_name": "/data/rec_dataset/yelp/processed/business.json",

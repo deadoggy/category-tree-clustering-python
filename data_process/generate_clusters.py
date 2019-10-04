@@ -12,7 +12,7 @@ print "load finished"
 
 
 YELP_DIMENSION = 22
-AMAZON_DIMENSION = 54
+AMAZON_DIMENSION = 85
 
 SOURCE_DATASET = 'AMAZON'
 
@@ -47,6 +47,7 @@ def cluster_convertor(uid, bus_cate_dict, kwargs):
             if not pivots.has_key(cate_path[0]):
                 pivots[cate_path[0]] = 0
             pivots[cate_path[0]] += 1
+    print pivots.keys()
     return [ uid, pivots.values() ]
 
 print "loading users"
@@ -58,26 +59,15 @@ print "loading users done"
 if len(data[0][1]) != AMAZON_DIMENSION:
     AMAZON_DIMENSION = len(data[0][1])
 
-print AMAZON_DIMENSION if SOURCE_DATASET=='AMAZON' else YELP_DIMENSION
 
 print len(data)
-
-# valid_user = random.sample(data, 5000) B007WZXQM0
-
-
-# with open('/home/yinjia/random5000', 'w') as uid_out:
-#     for u in valid_user:
-#         uid_out.write(u[0])
-#         if u != valid_user[-1]:
-#             uid_out.write('\n')
-
-
 
 
 sizes_list = [
     [1000, 600, 600, 800],
     [1000, 50, 550, 1400],
-    [2000, 200, 300, 500]
+    [2000, 200, 300, 500],
+    [200, 400, 100, 300, 800, 600, 750, 150, 900]
 ]
 
 
