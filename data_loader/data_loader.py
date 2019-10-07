@@ -9,16 +9,16 @@ import time
 
 class DataLoader:
 
-    def __init__(self):
+    def __init__(self, data_file_name=None, cate_file_name=None, business_file_name=None):
         '''
             load config and category information from processed data
         '''
 
         #load config
         config = Config().config
-        self.data_file_name = config['data_file_name']
-        self.cate_file_name = config['cate_file_name']
-        self.business_file_name = config['business_file_name']
+        self.data_file_name = config['data_file_name'] if data_file_name is None else data_file_name
+        self.cate_file_name = config['cate_file_name'] if cate_file_name is None else cate_file_name
+        self.business_file_name = config['business_file_name'] if business_file_name is None else business_file_name
 
         #load category
         self.cate_parent = {}
@@ -66,10 +66,13 @@ class DataLoader:
             #return: [ [<path_1>], [<path_2>], ...]
         '''
         paths = []
-        tail_cate = self.business_cate[bs_name]
-        for tc in tail_cate:
-            path = self.get_cate_list(tc)
-            paths.append(path)
+        if 'line' in self.business_file_name:
+            return  self.business_cate[bs_name]
+        else:
+            tail_cate = self.business_cate[bs_name]
+            for tc in tail_cate:
+                path = self.get_cate_list(tc)
+                paths.append(path)
         return paths
     
     def get_all_cate_path(self):

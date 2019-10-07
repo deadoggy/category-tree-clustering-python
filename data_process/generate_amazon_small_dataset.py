@@ -20,20 +20,20 @@ USER_BUSINESS_PATH_LS = [
 ]
 
 OUTPUT_FILE_PATH_LS = [
-    '/home/yinjia/experiment_dataset/amazon_s1_user_business_line.json',
-    '/home/yinjia/experiment_dataset/amazon_s2_user_business_line.json',
-    '/home/yinjia/experiment_dataset/amazon_s3_user_business_line.json',
-    '/home/yinjia/experiment_dataset/amazon_s4_user_business_line.json',
-    '/home/yinjia/experiment_dataset/yelp_s1_user_business_line.json',
-    '/home/yinjia/experiment_dataset/yelp_s2_user_business_line.json',
-    '/home/yinjia/experiment_dataset/yelp_s3_user_business_line.json',
-    '/home/yinjia/experiment_dataset/yelp_s4_user_business_line.json'
+    '/home/yinjia/experiment_dataset/clustering/amazon_s1_user_business_line.json',
+    '/home/yinjia/experiment_dataset/clustering/amazon_s2_user_business_line.json',
+    '/home/yinjia/experiment_dataset/clustering/amazon_s3_user_business_line.json',
+    '/home/yinjia/experiment_dataset/clustering/amazon_s4_user_business_line.json',
+    '/home/yinjia/experiment_dataset/clustering/yelp_s1_user_business_line.json',
+    '/home/yinjia/experiment_dataset/clustering/yelp_s2_user_business_line.json',
+    '/home/yinjia/experiment_dataset/clustering/yelp_s3_user_business_line.json',
+    '/home/yinjia/experiment_dataset/clustering/yelp_s4_user_business_line.json'
 ]
 
 AMAZON_UB = {}
 YELP_UB = {}
 
-for i in range(8):
+for i in range(4,8):
     print i
     UID_FILE_PATH = UID_FILE_PATH_LS[i]
     USER_BUSINESS_PATH = USER_BUSINESS_PATH_LS[0 if i < 4 else 1]

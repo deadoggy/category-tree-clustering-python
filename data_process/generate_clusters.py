@@ -14,7 +14,7 @@ print "load finished"
 YELP_DIMENSION = 22
 AMAZON_DIMENSION = 85
 
-SOURCE_DATASET = 'AMAZON'
+SOURCE_DATASET = 'YELP'
 
 ori_pivots = {}
 
@@ -47,7 +47,6 @@ def cluster_convertor(uid, bus_cate_dict, kwargs):
             if not pivots.has_key(cate_path[0]):
                 pivots[cate_path[0]] = 0
             pivots[cate_path[0]] += 1
-    print pivots.keys()
     return [ uid, pivots.values() ]
 
 print "loading users"

@@ -146,18 +146,24 @@ def vectorized_convertor(uid, bus_cate_dict, kwargs):
     for key in bus_cate_dict.keys():
         for p in bus_cate_dict[key]:
             path_sets.append(p)
+    
+    exp_sum = 0.
     for d in xrange(len(pivots)):
         t = pivots[d]
         if t.__class__ != CateTree:
             raise Exception('the %d-th pivot not a CateTree' % d)
-        feature_arr[d] = t.similarity(path_sets)
-        if sigma != 0.:
-            if type(sigma) == list:
-                s = sigma[d]
-            else:
-                s = sigma
-            u = t.similarity(path_sets)
-            feature_arr[d] = np.exp(-np.power(u, 2)/(2.0*np.power(s, 2)))
+        feature_arr[d] = np.exp(-t.similarity(path_sets))
+        exp_sum += feature_arr[d]
+        # if sigma != 0.:
+        #     if type(sigma) == list:
+        #         s = sigma[d]
+        #     else:
+        #         s = sigma
+        #     u = t.similarity(path_sets)
+        #     feature_arr[d] = np.exp(-np.power(u, 2)/(2.0*np.power(s, 2)))
+
+    for d in xrange(len(pivots)):
+        feature_arr[d] /= exp_sum
 
     feature_arr = np.array(feature_arr)
     return feature_arr
