@@ -12,8 +12,9 @@ import json
 # jaccard similarity category
 keys = [ -1., 0., .02, .04, .06, .08, .1, .12, .14, .16, .18, .2, .4, .6, .8, 1.]
 
-data_file_name = sys.argv[1]
-business_file_name = sys.argv[2]
+datatype = 'amazon'
+data_file_name = 'amazon_dist_ub_line.json'
+business_file_name = '/data/rec_dataset/amazon/amazon_business_category_line.json'
 
 dataloader = DataLoader(data_file_name=data_file_name, business_file_name=business_file_name)
 pivots = generate_category_tree(dataloader)
@@ -27,19 +28,15 @@ valid_uid = []
 valid_bus = []
 vec_data = []
 for u in data:
-    if len(u[1]) <= 5:
-        continue
     valid_uid.append(u[0])
     valid_bus.append(u[1])
     vec_data.append(u[2])
-    if len(valid_uid) >= 10000:
-        break
 
 print "++++++++++++++++++++ begin ++++++++++++++++++++++++++++++"
 print len(valid_uid)
 f_out = []
 for i in xrange(len(keys)-1):
-    f_out.append(open("distance_%f"%keys[i+1], 'a'))
+    f_out.append(open("%s_distance_%f"%(datatype, keys[i+1]), 'a'))
 
 for i in xrange(len(valid_uid)):
     print '%s/%s'%(i, len(valid_uid))

@@ -8,17 +8,17 @@ from matplotlib import ticker
 import matplotlib
 # jaccard similarity category
 keys = [ -1., 0., .02, .04, .06, .08, .1, .12, .14, .16, .18, .2, .4, .6, .8, 1.]
-sigmas = [1., 0.1, 0.01, 0.001, 0.0001]
 
-jac_stat = [0 for i in xrange(len(keys)-1)]
-vec_stat = [[0. for i in xrange(len(keys)-1)] for j in xrange(len(sigmas))]
+dataset = 'amazon'
+# jac_stat = [0 for i in xrange(len(keys)-1)]
+# vec_stat = [0. for i in xrange(len(keys)-1)]
 
 # print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + " begin loading"
 # for key_index in xrange(len(keys)-1):
 #     count = 0
-#     with open(sys.path[0] + "/distance_%f"%keys[key_index+1], 'r') as dist_in:
+#     with open("%s_distance_%f"%(dataset, keys[key_index+1]), 'r') as dist_in:
 #         print '=============================================='
-#         print 'distance_%f'%keys[key_index+1]
+#         print '%s_distance_%f'%(dataset, keys[key_index+1])
 #         line = dist_in.readline()
 #         while line!='':
 #             count += 1
@@ -29,19 +29,18 @@ vec_stat = [[0. for i in xrange(len(keys)-1)] for j in xrange(len(sigmas))]
 #             for line_idx, str_v in enumerate(line):
 #                 if line_idx<=2:
 #                     continue
-#                 vec_stat[line_idx-3][key_index] += float(str_v)
+#                 vec_stat[key_index] += float(str_v)
 #             line = dist_in.readline()
-# for i in xrange(len(sigmas)):
-#     for j in xrange(len(keys)-1):
-#         vec_stat[i][j] /= jac_stat[j] if jac_stat[j] > 0 else 1
+# for j in xrange(len(keys)-1):
+#     vec_stat[j] /= jac_stat[j] if jac_stat[j] > 0 else 1
 # print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + " begin drawing"
 
-# with open("distance_stat.json", "w") as dis_out:
+# with open("%s_distance_stat.json"%dataset, "w") as dis_out:
 #     out_dict = {"jac_stat":jac_stat, "vec_stat":vec_stat}
 #     print out_dict
 #     json.dump(out_dict, dis_out)
 
-with open('/home/yinjia/Documents/category-tree-clustering/data_process/distance_stat.json', 'r') as distance_in:
+with open('/home/yinjia/Documents/category-tree-clustering/%s_distance_stat.json'%dataset, 'r') as distance_in:
     dist_json = json.load(distance_in)
     vec_stat = dist_json['vec_stat']
     jac_stat = dist_json['jac_stat']
@@ -92,13 +91,12 @@ for d, ax in enumerate(axs):
     if d>=len(vec_stat):
         continue
     
-    i=2
-    y_step = int(max(vec_stat[i+1])/10)
+    y_step = int(max(vec_stat)/10)
     y_label = [ j*y_step for j in xrange(10)]
-    ax.bar(x_keys,vec_stat[i+1], width=-1., align='edge', color='#696969', edgecolor='#ffffff')
+    ax.bar(x_keys,vec_stat, width=-1., align='edge', color='#696969', edgecolor='#ffffff')
     # if i > 2:
     #     ax.set_xlabel('jaccard similarity', fontsize=13)
-    ax.text(x=x_keys[-6], y=max(vec_stat[i+1])*0.7, s=r"$\sigma$: %.3f"%sigmas[i+1])
+    # ax.text(x=x_keys[-6], y=max(vec_stat[i+1])*0.7, s=r"$\sigma$: %.3f"%sigmas[i+1])
     # ax.set_ylabel('average vuc distance',fontsize=14)
     ax.set_yticklabels(y_label)
     ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right")

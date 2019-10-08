@@ -12,9 +12,17 @@ import json
 # jaccard similarity category
 keys = [ -1., 0., .02, .04, .06, .08, .1, .12, .14, .16, .18, .2, .4, .6, .8, 1.]
 # category trees sigmods
-sigmas = [1., 0.1, 0.01, 0.001, 0.0001]
+sigmas = [0.001, 0.0001, 0.00001, 0.000001, 0.0000001, 0.00000001]
 
-dataloader = DataLoader()
+dataset = 'amazon'
+if dataset == 'amazon':
+    data_file_name = 'amazon_dist_ub_line.json'
+    business_file_name = '/data/rec_dataset/amazon/amazon_business_category_line.json'
+else:
+    data_file_name = 'yelp_dist_ub_line.json'
+    business_file_name = '/data/rec_dataset/yelp/processed/business_line.json'
+
+dataloader = DataLoader(data_file_name=data_file_name, business_file_name=business_file_name)
 pivots = generate_category_tree(dataloader)
 def cluster_convertor(uid, bus_cate_dict, kwargs):
     ret = [ uid, bus_cate_dict.keys(), ]
@@ -26,22 +34,20 @@ data = dataloader.load(cluster_convertor, pivots = pivots)
 
 valid_uid = []
 valid_bus = []
-sigma_data = [[], [], [], [], []]
+sigma_data = [[], [], [], [], [], []]
 for u in data:
-    if len(u[1]) <= 5:
-        continue
     valid_uid.append(u[0])
     valid_bus.append(u[1])
-    for i in xrange(5):
+    for i in xrange(len(sigmas)):
         sigma_data[i].append(u[i+2])
 
 print "++++++++++++++++++++ begin ++++++++++++++++++++++++++++++"
 print len(valid_uid)
 f_out = []
 for i in xrange(len(keys)-1):
-    f_out.append(open("distance_%f"%keys[i+1], 'a'))
+    f_out.append(open("/data/SDM_result/Jaccard/%s_distance_%f"%(dataset, keys[i+1]), 'a'))
 
-for i in xrange(len(valid_uid)):
+for i in xrange(0,len(valid_uid)):
     print '%s/%s'%(i, len(valid_uid))
     for j in xrange(i+1, len(valid_uid)):
         a = set(valid_bus[i])
