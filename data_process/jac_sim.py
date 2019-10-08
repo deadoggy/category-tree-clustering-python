@@ -14,7 +14,7 @@ keys = [ -1., 0., .02, .04, .06, .08, .1, .12, .14, .16, .18, .2, .4, .6, .8, 1.
 # category trees sigmods
 sigmas = [0.001, 0.0001, 0.00001, 0.000001, 0.0000001, 0.00000001]
 
-dataset = 'amazon'
+dataset = sys.argv[1]
 if dataset == 'amazon':
     data_file_name = 'amazon_dist_ub_line.json'
     business_file_name = '/data/rec_dataset/amazon/amazon_business_category_line.json'
