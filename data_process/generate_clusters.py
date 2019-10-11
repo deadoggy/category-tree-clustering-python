@@ -14,7 +14,7 @@ print "load finished"
 YELP_DIMENSION = 22
 AMAZON_DIMENSION = 85
 
-SOURCE_DATASET = 'YELP'
+SOURCE_DATASET = 'AMAZON'
 
 ori_pivots = {}
 
@@ -62,13 +62,14 @@ if len(data[0][1]) != AMAZON_DIMENSION:
 print len(data)
 
 
-sizes_list = [
-    [1000, 600, 600, 800],
-    [1000, 50, 550, 1400],
-    [2000, 200, 300, 500],
-    [200, 400, 100, 300, 800, 600, 750, 150, 900]
-]
+# sizes_list = [
+#     [1000, 600, 600, 800],
+#     [1000, 50, 550, 1400],
+#     [2000, 200, 300, 500],
+#     [200, 400, 100, 300, 800, 600, 750, 150, 900]
+# ]
 
+sizes_list = [[8000, 5000, 6000, 2000, 4000, 5000]]
 
 for sizes in sizes_list:
     valid_user = []
