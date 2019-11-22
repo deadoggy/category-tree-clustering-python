@@ -10,8 +10,8 @@ import matplotlib
 keys = [ -1., 0., .02, .04, .06, .08, .1, .12, .14, .16, .18, .2, .4, .6, .8, 1.]
 
 dataset = 'amazon'
-jac_stat = [0 for i in xrange(len(keys)-1)]
-vec_stat = [0. for i in xrange(len(keys)-1)]
+jac_stat = [0 for i in range(len(keys)-1)]
+vec_stat = [0. for i in range(len(keys)-1)]
 
 # print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + " begin loading"
 # for key_index in xrange(len(keys)-1):
@@ -45,29 +45,42 @@ with open('/data/SDM_result/Jaccard/%s_distance_stat.json'%dataset, 'r') as dist
     vec_stat = dist_json['vec_stat']
     jac_stat = dist_json['jac_stat']
 
-font = {'family' : 'normal',
+font = {'family' : 'serif',
         'weight' : 'normal',
-        'size'   : 15}
+        'size'   : 13}
 
 matplotlib.rc('font', **font)
 
-x_keys = [ str(keys[i]) for i in xrange(1, len(keys))]
-x_labels = [ "=0.00", "(0.00, 0.02]", "(0.02, 0.04]", "(0.04, 0.06]", "(0.06, 0.08]", "(0.08, 0.10]", "(0.10, 0.12]", "(0.12, 0.14]", "(0.14, 0.16]", "(0.16, 0.18]", "(0.18, 0.20]", "(0.20, 0.40]", "(0.40, 0.60]", "(0.60, 0.80]", "(0.80, 1.00]"]
+x_keys = [ str(keys[i]) for i in range(1, len(keys))]
+# x_labels = [ "=0.00", "(0.00, 0.02]", "(0.02, 0.04]", "(0.04, 0.06]", "(0.06, 0.08]", "(0.08, 0.10]", "(0.10, 0.12]", "(0.12, 0.14]", "(0.14, 0.16]", "(0.16, 0.18]", "(0.18, 0.20]", "(0.20, 0.40]", "(0.40, 0.60]", "(0.60, 0.80]", "(0.80, 1.00]"]
+
+x_labels = [ "0.00", "", "0.04", "", "0.08", "", "0.12", "", "0.16", "", "0.20", "", "0.60", "", "1.00"]
+
+formatter = ticker.ScalarFormatter(useMathText=True)
+formatter.set_scientific(True) 
+formatter.set_powerlimits((-1,1)) 
 
 #x_labels = [ "0.00", "0.02", "0.04", "0.06", "0.08", "0.10", "0.12", "0.14", "0.16", "0.18", "0.20", "0.40", "0.60", "0.80", "1.00"]
 
 non_x_labels = [" "," "," "," "," "," "," "," "," "," "," "," "," "," "," ",]
-fig = plt.figure(figsize=(8,8))
+fig = plt.figure(figsize=(5,5))
 ax = plt.subplot()
-ax.grid()
+# ax.grid()
 ax.bar(x_keys, jac_stat, width=1, align='edge', color='#000000', edgecolor='#ffffff')
 # for a, b in zip(x_keys, jac_stat):
 #     ax.text(a, b+0.000000001, '%d'%b, ha='right', va= 'bottom',fontsize=11)
 # ax.set_title('Jaccard Similarity Distribution', fontsize = 16)
 # ax.set_xlabel('jaccard similarity')
 # ax.set_ylabel('count')
-ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="center")
+ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="center", fontsize=10)
+y_step = int(max(jac_stat)/10)
+y_label = [ j*y_step for j in range(10)]
+ax.set_yticklabels(y_label,fontsize=10)
+ax.yaxis.set_major_formatter(formatter)
+ax.set_xlabel('Jaccard similarity',fontsize=13)
+ax.set_ylabel('Numbers of user pairs',fontsize=13)
 #plt.savefig('JaccardSimilarityDistribution.png')
+plt.tight_layout()
 plt.show()
 
 

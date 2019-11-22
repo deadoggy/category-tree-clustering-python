@@ -48,16 +48,18 @@ with open('/data/SDM_result/Jaccard/amazon_distance_stat.json', 'r') as distance
     vec_stat = dist_json['vec_stat']
     jac_stat = dist_json['jac_stat']
 
-font = {'family' : 'normal',
+font = {'family' : 'serif',
         'weight' : 'normal',
-        'size'   : 13}
+        'size'   : 12}
 
 matplotlib.rc('font', **font)
 
-x_keys = [ str(keys[i]) for i in xrange(1, len(keys))]
+x_keys = [ str(keys[i]) for i in range(1, len(keys))]
 # #x_labels = [ "=0.00", "(0.00, 0.02]", "(0.02, 0.04]", "(0.04, 0.06]", "(0.06, 0.08]", "(0.08, 0.10]", "(0.10, 0.12]", "(0.12, 0.14]", "(0.14, 0.16]", "(0.16, 0.18]", "(0.18, 0.20]", "(0.20, 0.40]", "(0.40, 0.60]", "(0.60, 0.80]", "(0.80, 1.00]"]
 
-x_labels = [ "0.00", "0.02", "0.04", "0.06", "0.08", "0.10", "0.12", "0.14", "0.16", "0.18", "0.20", "0.40", "0.60", "0.80", "1.00"]
+#x_labels = [ "0.00", "0.02", "0.04", "0.06", "0.08", "0.10", "0.12", "0.14", "0.16", "0.18", "0.20", "0.40", "0.60", "0.80", "1.00"]
+
+x_labels = [ "0.00", "", "0.04", "", "0.08", "", "0.12", "", "0.16", "", "0.20", "", "0.60", "", "1.00"]
 
 # non_x_labels = [" "," "," "," "," "," "," "," "," "," "," "," "," "," "," ",]
 # fig = plt.figure(figsize=(15,10))
@@ -80,11 +82,11 @@ ax3 = plt.subplot2grid((1, 10), (0, 4), colspan=2)
 ax4 = plt.subplot2grid((1, 10), (0, 6), colspan=2)
 ax5 = plt.subplot2grid((1, 10), (0, 8), colspan=2)
 
-axs = [ax1, ax2, ax3, ax4,ax5]
+axs = [ax1, ax2, ax3, ax4, ax5]
 
 
-fig.set_figwidth(18)
-fig.set_figheight(4)
+fig.set_figwidth(12)
+fig.set_figheight(3.5)
 
 formatter = ticker.ScalarFormatter(useMathText=True)
 formatter.set_scientific(True) 
@@ -96,24 +98,24 @@ for d, ax in enumerate(axs):
     
     i=d-1
     y_step = int(max(vec_stat[i+1])/10)
-    y_label = [ j*y_step for j in xrange(10)]
+    y_label = [ j*y_step for j in range(10)]
     ax.grid()
     ax.bar(x_keys,vec_stat[i+1], width=-1., align='edge', color='#000000', edgecolor='#ffffff')
     
     # if i > 2:
     #     ax.set_xlabel('jaccard similarity', fontsize=13)
     format_str = r"$\sigma$: %.1e"
-    ax.text(x=x_keys[-7], y=max(vec_stat[i+1])*0.7, s=format_str%sigmas[i+1], fontsize=14)
+    ax.text(x=x_keys[-10], y=max(vec_stat[i+1])*0.7, s=format_str%sigmas[i+1], fontsize=13)
     # ax.set_ylabel('average vuc distance',fontsize=14)
-    ax.set_yticklabels(y_label)
-    ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right", fontsize=10)
+    ax.set_yticklabels(y_label, fontsize=11)
+    ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right", fontsize=11)
     # if i> 2:
     #     ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right", fontsize=14)
     # else:
     #     ax.set_xticklabels(non_x_labels)
     ax.yaxis.set_major_formatter(formatter)
-    ax.set_xlabel('Jaccard Similarity')
-    ax.set_ylabel('Avg Cate Distance')
+    ax.set_xlabel('Jaccard similarity', fontsize=13)
+    ax.set_ylabel('Avgerage p-tree distance', fontsize=13)
 
 plt.tight_layout()
 #plt.savefig('CateVecDist-Jaccard.png')

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+       /* Set the size of the div element that contains the map */
+      #map {
+        height: 800px;  /* The height is 400 pixels */
+        width: 800px;  /* The width is the width of the web page */
+        float: left;
+        margin-left: 200px;
+       }
+
+       #panel {
+           height: 800px;
+           width: 500px;
+           float: left;
+           margin-left: 100px;
+       }
+    </style>
+  </head>
+  <body>
+    <h3>GeoGraphical Distance Demo</h3>
+    <!--The div element for the map -->
+    <div id="map"></div>
+    <div id="panel">
+        <table>
+
+            <tr id='tab'>
+
+            </tr>
+        </table>
+    </div>
+    <script src='../mdm_result.js'></script>
+    <script>
+
+        // Load dataset
+        var locations = data['locations'];
+        var km_labels = data['km_labels'];
+        var sp_labels = data['geog_labels'];
+        
+        // Config
+        var k = 5;
+        var labels = sp_labels[k-2];
+
+        // Generate different colors for different labels
+        function generateColors(labels){
+            var COLOR_CHR = ['0' ,'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+            var label_set = new Set(labels);
+            var colors = [];
+            
+            label_set.forEach(function (label){
+                var c = '#';
+                for(var idx=0; idx<6; idx++){
+                    c += COLOR_CHR[Math.floor(Math.random() * 16)];
+                }
+                colors.push(c);
+            });
+
+            return colors;
+        }
+
+        // Initialize and add the map
+        function initMap() {
+          // The location of Las Vegas
+          var lasvegas = {lat: 36.161313, lng: -115.174403};
+          // The map, centered at Las Vegas
+          var map = new google.maps.Map(
+              document.getElementById('map'), {zoom: 11, center: lasvegas});
+          
+          // Random colors
+          var colors = generateColors(labels);
+
+          // Show colors on panel
+          var table = "";
+          for(var i in colors){
+              table += "<tb style=\'background-color: " + colors[i] + "; width=50px;\'>     &nbsp" + i.toString() +"   &nbsp</tb>";
+          }
+          document.getElementById('tab').innerHTML = table;
+
+          for(var idx=0; idx<locations.length; idx++){ // For each user, generate a trajectory
+            var points = [];
+            for(var loc in locations[idx]){
+                points.push({lat:locations[idx][loc][0], lng: locations[idx][loc][1]});
+            }
+
+            var c = colors[labels[idx]];
+
+            var flightPath = new google.maps.Polyline({
+                  path: points,
+                  //geodesic: true,
+                  strokeColor: c,
+                  strokeOpacity: 0.2,
+                  strokeWeight: 0.2
+                });
+
+            flightPath.setMap(map);
+
+          }
+              
+
+        }
+
+    </script>
+    <!--Load the API from the specified URL
+    * The async attribute allows the browser to render the page while the API loads
+    * The key parameter will contain your own API key (which is not needed for this tutorial)
+    * The callback parameter executes the initMap() function
+    -->
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6dUccrieLZByTNqs1hrLDxdqMh7FRrww&callback=initMap">
+    </script>
+  </body>
+</html>
+

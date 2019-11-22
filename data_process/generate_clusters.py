@@ -8,13 +8,13 @@ import random
 import json
 
 dataloader = DataLoader()
-print "load finished"
+print("load finished")
 
 
 YELP_DIMENSION = 22
 AMAZON_DIMENSION = 85
 
-SOURCE_DATASET = 'AMAZON'
+SOURCE_DATASET = ''
 
 ori_pivots = {}
 
@@ -24,7 +24,7 @@ if SOURCE_DATASET == 'AMAZON':
     for bid in buscate:
         paths = buscate[bid]
         for p in paths:
-            if not ori_pivots.has_key(p[0]):
+            if p[0] not in ori_pivots:
                 ori_pivots[p[0]] = 0
         if len(ori_pivots.keys())==AMAZON_DIMENSION:
             break
@@ -44,22 +44,22 @@ def cluster_convertor(uid, bus_cate_dict, kwargs):
     pivots = deepcopy(ori_pivots)
     for bid in bus_cate_dict:
         for cate_path in bus_cate_dict[bid]:
-            if not pivots.has_key(cate_path[0]):
+            if cate_path[0] not in pivots:
                 pivots[cate_path[0]] = 0
             pivots[cate_path[0]] += 1
-    return [ uid, pivots.values() ]
+    return [ uid, list(pivots.values()) ]
 
-print "loading users"
+print( "loading users" )
 
 data = dataloader.load(cluster_convertor)
 
-print "loading users done"
+print( "loading users done" )
 
 if len(data[0][1]) != AMAZON_DIMENSION:
     AMAZON_DIMENSION = len(data[0][1])
 
 
-print len(data)
+print( len(data) )
 
 
 # sizes_list = [
@@ -69,7 +69,7 @@ print len(data)
 #     [200, 400, 100, 300, 800, 600, 750, 150, 900]
 # ]
 
-sizes_list = [[8000, 5000, 6000, 2000, 4000, 5000]]
+sizes_list = [[10000, 8000, 6000, 7000, 9000, 11000, 9000, 5000, 5000, 10000, 8000, 5000, 7000]]
 
 for sizes in sizes_list:
     valid_user = []
@@ -104,10 +104,10 @@ for sizes in sizes_list:
                     d_valid_uid.append(item[0])
                     d_dim_cnt.append(item[1])
                 if len(d_valid_uid) == size:
-                    print d
+                    print( d )
                     valid_user.extend(d_valid_uid)
                     dimension_cnt.extend(d_dim_cnt)
-                    label.extend([current_label for i in xrange(size)])
+                    label.extend([current_label for i in range(size)])
                     current_size_index += 1
                     current_label += 1
                     break
@@ -115,7 +115,7 @@ for sizes in sizes_list:
             break
 
     if len(set(valid_user)) != len(valid_user):
-        print "Duplicates"
+        print( "Duplicates" )
 
     FILE_NAME = SOURCE_DATASET
 

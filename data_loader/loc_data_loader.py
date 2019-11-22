@@ -41,11 +41,11 @@ class LocDataLoader:
         for bid in self.business.keys():
             path = self.business[bid]
             name = path[self.top_level]
-            if not pivots_dict.has_key(name):
+            if name not in pivots_dict:
                 pivots_dict[name] = CateTree()
             pivots_dict[name].insert(path[self.top_level:])
         
-        return pivots_dict.values()
+        return list(pivots_dict.values())
     
     def load(self, convert_func, **kwargs):
         '''
@@ -65,12 +65,12 @@ class LocDataLoader:
         '''
         if type(convert_func).__name__ != 'function':
             raise Exception('convert_func must be a function')
-        print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' begin loading...'
+        print (time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' begin loading...')
         with open(self.user_business_file) as user_data_in:
             user_data = json.load(user_data_in)
         
-        valid_uid = kwargs['valid_uid'] if kwargs.has_key('valid_uid') else user_data.keys()
-        data_size = kwargs['data_size'] if kwargs.has_key('data_size') else float('inf')
+        valid_uid = kwargs['valid_uid'] if 'valid_uid' in kwargs else user_data.keys()
+        data_size = kwargs['data_size'] if 'data_size' in kwargs else float('inf')
         #ret_data = [None for i in xrange(len(user_data.keys()))] if valid_uid is None else [None for i in xrange(len(valid_uid))]
         ret_data = {}
 
@@ -78,11 +78,11 @@ class LocDataLoader:
             if idx+1 > data_size:
                 break
             if (idx + 1)%10000==0:
-                print idx
+                print (idx)
             bus_loc_dict = {}
             for bid in user_data[uid]:
                 bus_loc_dict[bid] = [self.business[bid][self.top_level:]]
             ret_idx = idx if len(valid_uid)==len(user_data) else valid_uid.index(uid)
             ret_data[uid] = convert_func(uid, bus_loc_dict, kwargs)
-        print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' loading finished'
+        print (time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' loading finished')
         return ret_data

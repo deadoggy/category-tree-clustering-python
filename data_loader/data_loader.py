@@ -27,7 +27,7 @@ class DataLoader:
                 cate_rec = csv.reader(cate_csv)
                 for row in cate_rec:
                     self.cate_parent[row[0]] = row[1]
-            except Exception, e:
+            except Exception as e:
                 raise e
         
         #load business's category info
@@ -104,7 +104,7 @@ class DataLoader:
         '''
         if type(convert_func).__name__ != 'function':
             raise Exception('convert_func must be a function')
-        print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' begin loading...'
+        print (time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' begin loading...')
         user_data = {}
 
         with open(self.data_file_name) as user_data_f:
@@ -118,25 +118,25 @@ class DataLoader:
                 user_data = json.load(user_data_f)
         
         
-        valid_uid = kwargs['valid_uid'] if kwargs.has_key('valid_uid') else user_data.keys()
-        data_size = kwargs['data_size'] if kwargs.has_key('data_size') else float('inf')
-        ret_data = [None for i in xrange(len(user_data.keys()))] if valid_uid is None else [None for i in xrange(len(valid_uid))]
+        valid_uid = kwargs['valid_uid'] if 'valid_uid' in kwargs else user_data.keys()
+        data_size = kwargs['data_size'] if 'data_size' in kwargs else float('inf')
+        ret_data = [None for i in range(len(user_data.keys()))] if valid_uid is None else [None for i in range(len(valid_uid))]
 
-        print "size of valid users: %d"%len(valid_uid)
+        print ("size of valid users: %d"%len(valid_uid))
 
         for count, uid in enumerate(valid_uid):
             if count+1 > data_size:
                 break
 
             if count % 10000==0:
-                print count
+                print (count)
             bus_dict = {}
             for bid in user_data[uid]:
-                if self.business_cate.has_key(bid):
+                if bid in self.business_cate:
                     bus_dict[bid] = self.get_business_cate_path(bid) if 'line' not in self.business_file_name else self.business_cate[bid]
             index = count if len(valid_uid)==len(user_data) else valid_uid.index(uid)
             ret_data[index] = convert_func(uid, bus_dict, kwargs)
-        print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' loading finished'
+        print (time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + ' loading finished')
         return ret_data
 
         

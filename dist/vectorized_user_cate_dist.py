@@ -60,7 +60,7 @@ class CateTree:
             raise Exception('cate_path must be a list!')
 
         current_node = self.root
-        for i in xrange(len(cate_path)):
+        for i in range(len(cate_path)):
             tmp_label = cate_path[i]
             tmp_chd_set = current_node.chd_set
             
@@ -93,7 +93,7 @@ class CateTree:
             similarity = 1.0
             found = True
             p = self.root
-            for i in xrange(len(path)):
+            for i in range(len(path)):
                 label = path[i]
                 user_cate_node = p.find_label_in_chd(label)
                 if user_cate_node is not None:
@@ -132,22 +132,22 @@ def vectorized_convertor(uid, bus_cate_dict, kwargs):
         raise Exception('pivots in kwargs must be a list of CateTree')
     try:
         sigma = kwargs['sigma']
-    except Exception, e:
+    except Exception as e:
         sigma = 0.
     if type(sigma) != float and type(sigma)!=int and type(sigma)!=list:
         raise Exception('sigma in kwargs must be a float or an int or an list')
 
-    feature_arr = [0.0 for i in xrange(len(pivots))]
+    feature_arr = [0.0 for i in range(len(pivots))]
     path_sets = []
     for key in bus_cate_dict.keys():
         for p in bus_cate_dict[key]:
             path_sets.append(p)
     
-    for d in xrange(len(pivots)):
+    for d in range(len(pivots)):
         t = pivots[d]
         if t.__class__ != CateTree:
             raise Exception('the %d-th pivot not a CateTree' % d)
-        feature_arr[d] = -t.similarity(path_sets)
+        feature_arr[d] = t.similarity(path_sets)
         if sigma != 0.:
             if type(sigma) == list:
                 s = sigma[d]
@@ -155,9 +155,7 @@ def vectorized_convertor(uid, bus_cate_dict, kwargs):
                 s = sigma
             u = t.similarity(path_sets)
             feature_arr[d] = np.exp(-np.power(u, 2)/(2.0*np.power(s, 2)))
-
-    feature_arr = np.array(feature_arr)
-    return feature_arr
+    return list(feature_arr)
 
 def vectorized_dist_calculator(v_1, v_2):
     '''
@@ -191,10 +189,10 @@ def generate_category_tree(data_loader):
     all_paths = data_loader.get_all_cate_path()
     for path in all_paths:
         tree_name = path[0]
-        if not pivots_dict.has_key(tree_name):
+        if  tree_name not in pivots_dict:
             pivots_dict[tree_name] = CateTree()
         pivots_dict[tree_name].insert(path)
     
-    return pivots_dict.values()
+    return list(pivots_dict.values())
 
     
