@@ -10,3 +10,5 @@ result/*
 icmeRes/*
 .vscode/*
 */vscode/*
+*_mat
+*.js

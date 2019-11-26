@@ -30,17 +30,17 @@
             </tr>
         </table>
     </div>
-    <script src='../mdm_result.js'></script>
+    <script src='../geog_result.js'></script>
     <script>
 
         // Load dataset
         var locations = data['locations'];
-        var km_labels = data['km_labels'];
+        var addr_labels = data['addr_labels'];
         var sp_labels = data['geog_labels'];
         
         // Config
-        var k = 5;
-        var labels = sp_labels[k-2];
+        var k = 15;
+        var labels = addr_labels[k-2];
 
         // Generate different colors for different labels
         function generateColors(labels){
@@ -89,7 +89,7 @@
                   path: points,
                   //geodesic: true,
                   strokeColor: c,
-                  strokeOpacity: 0.2,
+                  strokeOpacity: 0.4,
                   strokeWeight: 0.2
                 });
 
