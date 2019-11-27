@@ -3,49 +3,115 @@
   <head>
     <style>
        /* Set the size of the div element that contains the map */
-      #map {
-        height: 800px;  /* The height is 400 pixels */
-        width: 800px;  /* The width is the width of the web page */
+      #leftmap {
+        height: 600px;  /* The height is 400 pixels */
+        width: 600px;  /* The width is the width of the web page */
         float: left;
-        margin-left: 200px;
        }
 
-       #panel {
+       #leftpanel {
            height: 800px;
            width: 500px;
            float: left;
-           margin-left: 100px;
+           margin-left: 200px;
        }
+
+       #rightpanel {
+           height: 800px;
+           width: 500px;
+           float: right;
+           margin-right: 400px;
+       }
+
+       #rightmap {
+          height: 600px;
+          width: 600px;
+          float: left;
+       }
+
     </style>
   </head>
   <body>
-    <h3>GeoGraphical Distance Demo</h3>
-    <!--The div element for the map -->
-    <div id="map"></div>
-    <div id="panel">
+   
+    <div id="leftpanel">
+        <br><br>
         <table>
-
-            <tr id='tab'>
-
-            </tr>
+          <tr>
+            Metric=<select id='leftmetric'>
+              <option value="geog" selected>geog</option>
+              <option value="jaccard">jaccard</option>
+              <option value="geom_ctr">geom_ctr</option>
+              <option value="geom_bet">geom_bet</option>
+            </select>
+            <br>
+          </tr>
+          <tr>
+            <td>
+              K= <input id='leftk' value='17' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button onclick="initMap(LEFT)">refresh</button>
+            </td>
+          </tr>
         </table>
+        <p id='leftmapinfo'>Last Map: </p>
+        <table><tr id='lefttab'></tr></table>
+        <div id="leftmap"></div>
+    </div>
+    <div id="rightpanel">
+        <br><br>
+        <table>
+          <tr>
+            Metric=<select id='rightmetric'>
+              <option value="geog">geog</option>
+              <option value="jaccard">jaccard</option>
+              <option value="geom_ctr" selected>geom_ctr</option>
+              <option value="geom_bet">geom_bet</option>
+            </select>
+            <br>
+          </tr>
+          <tr>
+            <td>
+              K= <input id='rightk' value='4' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button onclick="initMap(RIGHT)">refresh</button>
+            </td>
+          </tr>
+        </table>
+        <p id='rightmapinfo'>Last Map: </p>
+        <table><tr id='righttab'></tr></table>
+        <div id="rightmap"></div>
     </div>
     <script src='../geog_result.js'></script>
+    <script src='../geog_uid_loc.js'></script>
     <script>
+        // geog k = 17
+        // geom_ctr k = 4
+        // geom_bet k = 5
+        // jaccard  k = 4
 
-        // Load dataset
-        var locations = data['locations'];
-        var addr_labels = data['addr_labels'];
-        var sp_labels = data['geog_labels'];
+        // Const
+        var LEFT = 0, RIGHT = 1;
+        var PREFIX = ['left', 'right'];
         
-        // Config
-        var k = 15;
-        var labels = addr_labels[k-2];
+        // Load dataset
+        var locations = user_data['locations'];
 
+        // Config
+        var k = [null, null];
+        var metric = [null, null];
+        var labels = [null, null];
+        var color = [null, null];
+        var showingLabels = [[], []]
         // Generate different colors for different labels
-        function generateColors(labels){
+        function generateColors(which){
             var COLOR_CHR = ['0' ,'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
-            var label_set = new Set(labels);
+            var label_set = new Set(labels[which]);
             var colors = [];
             
             label_set.forEach(function (label){
@@ -56,48 +122,105 @@
                 colors.push(c);
             });
 
-            return colors;
+            color[which] = colors;
         }
 
-        // Initialize and add the map
-        function initMap() {
+        function getParameters(which){
+          var select = document.getElementById(PREFIX[which] + 'metric')
+          metric[which] = select.options[select.selectedIndex].value;
+
+          var input = document.getElementById(PREFIX[which] + 'k')
+          k[which] = parseInt(input.value); 
+
+          labels[which] = data[metric[which]]['labels'][k[which]-2];          
+        }
+        
+        // draw
+
+        function showByColor(which){
+          
           // The location of Las Vegas
           var lasvegas = {lat: 36.161313, lng: -115.174403};
           // The map, centered at Las Vegas
           var map = new google.maps.Map(
-              document.getElementById('map'), {zoom: 11, center: lasvegas});
-          
-          // Random colors
-          var colors = generateColors(labels);
-
-          // Show colors on panel
-          var table = "";
-          for(var i in colors){
-              table += "<tb style=\'background-color: " + colors[i] + "; width=50px;\'>     &nbsp" + i.toString() +"   &nbsp</tb>";
-          }
-          document.getElementById('tab').innerHTML = table;
+            document.getElementById(PREFIX[which] + 'map'), {zoom: 11, center: lasvegas});
 
           for(var idx=0; idx<locations.length; idx++){ // For each user, generate a trajectory
+            if(!showingLabels[which].includes(labels[which][idx])){
+              continue
+            }
             var points = [];
             for(var loc in locations[idx]){
                 points.push({lat:locations[idx][loc][0], lng: locations[idx][loc][1]});
             }
 
-            var c = colors[labels[idx]];
+            var c = color[which][labels[which][idx]];
 
             var flightPath = new google.maps.Polyline({
                   path: points,
                   //geodesic: true,
                   strokeColor: c,
-                  strokeOpacity: 0.4,
-                  strokeWeight: 0.2
+                  strokeOpacity: 0.8,
+                  strokeWeight: 0.8
                 });
 
             flightPath.setMap(map);
 
           }
-              
+ 
 
+        }
+
+        // Initialize and add the map
+        function initMap(which) {
+          
+          // parameters
+          getParameters(which);
+         
+          // Random colors
+          generateColors(which);
+
+          // Show colors on panel
+          var table = "";
+          for(var i in color[which]){
+              table += "<tb style=\'background-color: " + color[which][i] + "; width=50px;\' onclick=\'clickColor(" + which.toString() 
+              + ","+ i.toString() + ");\' >     &nbsp" + i.toString() +"   &nbsp</tb>";
+          }
+          document.getElementById(PREFIX[which] + 'tab').innerHTML = table;
+          
+          // add all label to showingLabels
+          var labelSet = new Set(labels[which]);
+          labelSet.forEach(function (label){
+              showingLabels[which].push(label);
+          });
+
+          showByColor(which);
+
+        }
+
+        function clickColor(which, label){
+            // judge whether <Ctrl> is pressed
+            var evt = window.event;
+            if(evt.ctrlKey==0 && evt.altKey==0){
+              showingLabels[which] = []
+            }else if(showingLabels[which].includes(label) && evt.altKey==0){
+              return;
+            }
+
+            if(evt.altKey==1 && evt.ctrlKey==0 && showingLabels[which].includes(label)){
+              var idx = showingLabels[which].indexOf(label);
+              showingLabels[which].splice(idx,1);
+            }else{
+              showingLabels[which].push(label);
+            }
+            showByColor(which);
+            
+
+        }
+
+        function drawAll(){
+          initMap(LEFT);
+          initMap(RIGHT);
         }
 
     </script>
@@ -107,7 +230,7 @@
     * The callback parameter executes the initMap() function
     -->
     <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6dUccrieLZByTNqs1hrLDxdqMh7FRrww&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6dUccrieLZByTNqs1hrLDxdqMh7FRrww&callback=drawAll">
     </script>
   </body>
 </html>

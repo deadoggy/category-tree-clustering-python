@@ -58,6 +58,10 @@ while True:
     if datasize == len(geog_data):
         break
 
+geog_user_loc = {'uid': uids, 'locations': [ user_latlon[u] for u in uids]}
+with open('geog_uid_loc.json', 'w') as user_loc_out:
+    json.dump(geog_user_loc, user_loc_out)
+
 geog_data = np.array(minmax_scale(geog_data, axis=1))
 
 geom_data = []
