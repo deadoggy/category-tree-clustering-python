@@ -20,7 +20,7 @@ ori_pivots = {}
 
 buscate = dataloader.business_cate
 
-if SOURCE_DATASET == 'AMAZON':
+if SOURCE_DATASET == 'YELP':
     for bid in buscate:
         paths = buscate[bid]
         for p in paths:

@@ -14,7 +14,7 @@ class CateTreeNode:
             @laebl: label of the node
             @parent: parent node
         '''
-        if type(label)!=str and type(label)!=unicode:
+        if type(label)!=str:
             raise Exception('label must be str or unicode')
         if parent is not None and parent.__class__!=CateTreeNode:
             raise Exception('parent must be a CateTreeNode')
@@ -32,7 +32,7 @@ class CateTreeNode:
 
             #return: None if not exists, else the instance
         '''
-        if type(label)!=str and type(label)!=unicode:
+        if type(label)!=str:
             raise Exception('label must be str or unicode')
         
         for n in self.chd_set:

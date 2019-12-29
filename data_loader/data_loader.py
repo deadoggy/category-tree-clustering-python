@@ -128,7 +128,7 @@ class DataLoader:
             if count+1 > data_size:
                 break
 
-            if count % 10000==0:
+            if count % 100==0:
                 print (count)
             bus_dict = {}
             for bid in user_data[uid]:

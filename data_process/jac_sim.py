@@ -38,32 +38,47 @@ sigma_data = [[], [], [], [], [], []]
 for u in data:
     valid_uid.append(u[0])
     valid_bus.append(u[1])
-    for i in xrange(len(sigmas)):
+    for i in range(len(sigmas)):
         sigma_data[i].append(u[i+2])
 
-print "++++++++++++++++++++ begin ++++++++++++++++++++++++++++++"
-print len(valid_uid)
-f_out = []
-for i in xrange(len(keys)-1):
-    f_out.append(open("/data/SDM_result/Jaccard/%s_distance_%f"%(dataset, keys[i+1]), 'a'))
+sigma_data = np.array(sigma_data)
+for sig_idx in range(len(sigmas)):
+    dim = sigma_data[sig_idx].shape[1]
+    for dim_idx in range(dim):
+        mean = np.mean(sigma_data[sig_idx][:,dim_idx])
+        std_var = np.sqrt(np.var(sigma_data[sig_idx][:, dim_idx]))
+        if std_var!=0.:
+            sigma_data[sig_idx][:, dim_idx] = (sigma_data[sig_idx][:, dim_idx] - mean) / (np.sqrt(2) * std_var)
 
-for i in xrange(0,len(valid_uid)):
-    print '%s/%s'%(i, len(valid_uid))
-    for j in xrange(i+1, len(valid_uid)):
-        a = set(valid_bus[i])
-        b = set(valid_bus[j])
-        ab_inter = a.intersection(b)
-        jac_sim = len(ab_inter) / (len(a) + len(b) - len(ab_inter))
+print ("++++++++++++++++++++ begin ++++++++++++++++++++++++++++++")
+print (len(valid_uid))
+# f_out = []
+# for i in range(len(keys)-1):
+#     f_out.append(open("/data/SDM_result/Jaccard/%s_distance_%f"%(dataset, keys[i+1]), 'a'))
+f_out = open("/data/SDM_result/chi/%s_distance"%dataset, 'a')
+for i in range(0,len(valid_uid)):
+    print ('%s/%s'%(i, len(valid_uid)))
+    for j in range(i+1, len(valid_uid)):
+        # a = set(valid_bus[i])
+        # b = set(valid_bus[j])
+        # ab_inter = a.intersection(b)
+        # jac_sim = len(ab_inter) / (len(a) + len(b) - len(ab_inter))
 
-        for k in xrange(len(keys)-1):
-            low = keys[k]
-            up = keys[k+1]
-            if jac_sim > low and jac_sim <= up:
-                out_pair = "%s,%s,%f"%(valid_uid[i], valid_uid[j], jac_sim)
-                for p in xrange(len(sigmas)):
-                    out_pair += ",%f"%vectorized_dist_calculator(sigma_data[p][i], sigma_data[p][j])
-                f_out[k].write(str(out_pair) + "\n")
-                break
-for f in f_out:
-    f.close()
+        # for k in range(len(keys)-1):
+        #     low = keys[k]
+        #     up = keys[k+1]
+        #     if jac_sim > low and jac_sim <= up:
+        #         out_pair = "%s,%s,%f"%(valid_uid[i], valid_uid[j], jac_sim)
+        #         for p in range(len(sigmas)):
+        #             out_pair += ",%f"%vectorized_dist_calculator(sigma_data[p][i], sigma_data[p][j])
+        #         f_out[k].write(str(out_pair) + "\n")
+        #         break
+        out_pair = "%s,%s"%(valid_uid[i], valid_uid[j])
+        for p in range(len(sigmas)):
+            out_pair += ",%f"%vectorized_dist_calculator(sigma_data[p][i], sigma_data[p][j])
+        f_out.write(out_pair + "\n")         
 
+# for f in f_out:
+#     f.close()
+f_out.flush()
+f_out.close()
