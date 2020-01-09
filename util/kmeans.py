@@ -99,7 +99,7 @@ def test():
         [[98, 100], [105, 97], [100, 120]]
     ]
     labels = KMeans(dataset, 2, rand_center, generate_new_centers, dist=dist_metric)
-    print labels
+    print(labels)
 
 if __name__=='__main__':
     test()
