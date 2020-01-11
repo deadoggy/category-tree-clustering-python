@@ -53,8 +53,8 @@ def dunn_index(data, label, metric=None):
             i_label = unique_label[i]
             j_label = unique_label[j]
 
-            row_idx = np.where(label==i_label)
-            col_idx = np.where(label==j_label)
+            row_idx = np.where(label==i_label)[0]
+            col_idx = np.where(label==j_label)[0]
             ij_min = np.min(mat[row_idx, :][:, col_idx])
 
             min_betcls_dist = min(min_betcls_dist, ij_min)
@@ -62,7 +62,7 @@ def dunn_index(data, label, metric=None):
     # step.2 calculate max distance within cluster
     max_incls_dist = -np.inf
     for i, l in enumerate(unique_label):
-        rowcol_idx = np.where(label==l)
+        rowcol_idx = np.where(label==l)[0]
         i_max = np.max(mat[rowcol_idx,:][:,rowcol_idx])
 
         max_incls_dist = max(max_incls_dist, i_max)

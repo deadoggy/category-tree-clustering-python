@@ -17,7 +17,7 @@ def generate_new_centers(dataset, labels, k):
         #return: list, shape = [k:x:2], where k=(Size of target clusters), x=(Size of locations of a cluster), 2=([x,y] of location)
     '''
     
-    centers = [ [] for i in xrange(k) ]
+    centers = [ [] for i in range(k) ]
     for idx, dp in enumerate(dataset):
         centers[labels[idx]].append(dp)
     return centers
@@ -64,7 +64,7 @@ def KMeans(dataset, k, ctr_initializer, ctr_generator, dist, max_itrs = 300):
 
         #return: list, shape=[N:], labels of data point
     '''
-    labels = np.array([ -1 for i in xrange(len(dataset)) ])
+    labels = np.array([ -1 for i in range(len(dataset)) ])
     centers = ctr_initializer(dataset, k)
     labels_changed = True
     itrs = 0
