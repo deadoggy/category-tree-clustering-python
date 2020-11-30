@@ -22,7 +22,7 @@ config = Config().config
 with open(config['processed_data_path'] + 'lasvegas_X.json') as data_in:
     X = json.load(data_in)
 
-print X.keys()
+print (X.keys())
 
 all_dist_list = []
 
@@ -42,23 +42,23 @@ def dist_var(mean, loc_list):
 
 loc_vars = []
 
-for idx in xrange(5000):
+for idx in range(5000):
     mean = X['user_3857_X'][idx]
     loc_list = X['user_3857_all'][idx]
     vari = dist_var(mean, loc_list)
     if vari < .3e11:
         loc_vars.append(vari)
 
-print np.array(all_dist_list).max()
+print (np.array(all_dist_list).max())
 
-print len(all_dist_list)
+print (len(all_dist_list))
 
 rgs = [[-1., 0.]]
-for i in xrange(0, 40):
+for i in range(0, 40):
     rgs.append([i*2e6, (i+1)*2e6])
-var_count = [0 for i  in xrange(len(rgs))]
+var_count = [0 for i  in range(len(rgs))]
 for v in loc_vars:
-    for idx in xrange(len(var_count)):
+    for idx in range(len(var_count)):
         if v > rgs[idx][0] and v <= rgs[idx][1]:
             var_count[idx] += 1
             break

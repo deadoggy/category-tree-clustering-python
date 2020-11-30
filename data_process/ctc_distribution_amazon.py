@@ -94,17 +94,18 @@ matplotlib.rc('font', **font)
 
 
 fig = plt.figure()
-ax1 = plt.subplot2grid((1, 10), (0, 0), colspan=2)
-ax2 = plt.subplot2grid((1, 10), (0, 2), colspan=2)
-ax3 = plt.subplot2grid((1, 10), (0, 4), colspan=2)
-ax4 = plt.subplot2grid((1, 10), (0, 6), colspan=2)
-ax5 = plt.subplot2grid((1, 10), (0, 8), colspan=2)
+ax1 = plt.subplot2grid((1, 8), (0, 0), colspan=2)
+ax2 = plt.subplot2grid((1, 8), (0, 2), colspan=2)
+ax3 = plt.subplot2grid((1, 8), (0, 4), colspan=2)
+ax4 = plt.subplot2grid((1, 8), (0, 6), colspan=2)
+# ax5 = plt.subplot2grid((1, 10), (0, 8), colspan=2)
 #ax6 = plt.subplot2grid((2, 6), (1, 4), colspan=2)
+sigmas = ['$10^{-3}$', '$10^{-4}$','$10^{-5}$','$10^{-6}$',]
 
-axs = [ax1, ax2, ax3, ax4, ax5]
+axs = [ax1, ax2, ax3, ax4, ]
 
 fig.set_figwidth(12)
-fig.set_figheight(4)
+fig.set_figheight(3.5)
 
 formatter = ticker.ScalarFormatter(useMathText=True)
 formatter.set_scientific(True) 
@@ -121,7 +122,7 @@ for i, ax in enumerate(axs):
     y = ctc_dist_data[i] + [0]
     y_step = int(max(y)/10)
     y_labels = [ j*y_step for j in range(10)]
-    ax.grid()
+    # ax.grid()
     ax.bar(x, y, width=1., align='edge', color='#000000', edgecolor='#ffffff')
     # lv = -1.
     # for zi, (a, b) in enumerate(zip(x, y)):
@@ -130,7 +131,7 @@ for i, ax in enumerate(axs):
     #     lv = v
     ax.set_xlabel('Proposed distance',fontsize=13)
     ax.set_ylabel('Numbers of user pairs',fontsize=13)
-    ax.text(x=x[-9], y=max(y)*0.75, s="$\sigma$: %.1e"%sigmas[i],fontsize=13)
+    ax.text(x=x[-9], y=max(y)*0.75, s="$\sigma$: "+sigmas[i],fontsize=13)
     ax.set_xticklabels(x_labels, rotation=30, fontsize=11)
     ax.set_yticklabels(y_labels, fontsize=11)
     ax.yaxis.set_major_formatter(formatter)

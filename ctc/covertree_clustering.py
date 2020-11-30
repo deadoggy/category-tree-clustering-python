@@ -3,8 +3,8 @@
 import sys
 sys.path.append(sys.path[0] + '/../')
 from covertree.covertree import CoverTree
+from ctc.density_covertree import DensityCoverTree
 from covertree.node import Node
-from density_covertree import DensityCoverTree
 import numpy as np
 
 def covertree_clustering(dct, k):
@@ -31,16 +31,19 @@ def covertree_clustering(dct, k):
         if len(level) >= k or (len(level)<k and len(level)==len(dct.level_stack[-1])):
             for n in level:
                 density_n = dct.estimate_density(n)
-                if not candidate_centers.has_key(density_n):
+                if density_n not in candidate_centers:
                     candidate_centers[density_n] = []
                 candidate_centers[density_n].append(n)
             break
-    sorted_densities = np.sort(candidate_centers.keys())
+    try:
+        sorted_densities = np.sort(list(candidate_centers.keys()))
+    except Exception as e:
+        print(e)
     
     # 1.2 find first k centers with biggest density
     result_set = {}
     k_size = 0
-    for density_i in xrange(len(sorted_densities)-1, -1, -1):
+    for density_i in range(len(sorted_densities)-1, -1, -1):
         density = sorted_densities[density_i]
         quit_loop = False
 
@@ -56,7 +59,7 @@ def covertree_clustering(dct, k):
     # 2. assign all nodes to their nearest node
     dist = dct.dist_calculator
     centers = result_set.keys()
-    labels = np.array([-1 for i in xrange(dct.size)])
+    labels = np.array([-1 for i in range(dct.size)])
     for n in dct.level_stack[-1]:
         clus = -1
         min_dist = float('inf')

@@ -1,9 +1,11 @@
 #coding:utf-8
 
-from node import Node
+import sys
+sys.path.append(sys.path[0] + '/../')
 import math
 from time import clock
 import numpy as np
+from covertree.node import *
 
 class CoverTree:
 
@@ -37,7 +39,7 @@ class CoverTree:
         if self._insert(node, set,  self.top_level):
             self.size += 1
         else:
-            print 'insert false'
+            print ('insert false')
         
     def _insert(self, node, cover_set, level):
         '''
@@ -207,7 +209,7 @@ class CoverTree:
         
         #update to the lowest level
         parent = node
-        for i in xrange(current_level-1, self.top_level-len(self.level_stack), -1):
+        for i in range(current_level-1, self.top_level-len(self.level_stack), -1):
             son = parent.generate_chd(True)
             self.level_stack[self.top_level-i].append(son)
             parent = son

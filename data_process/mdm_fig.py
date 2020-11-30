@@ -67,14 +67,14 @@ def resort_affi(X, label):
     #resort
     s_label = set(label)
     cls_sizes = [ label.tolist().count(i) for i in s_label ]
-    cls_sufidx = [ int(np.sum(cls_sizes[0:i])) for i in xrange(len(s_label)) ]
+    cls_sufidx = [ int(np.sum(cls_sizes[0:i])) for i in range(len(s_label)) ]
     sorted_X = np.zeros_like(X)
     for idx, l in enumerate(label):
         sorted_X[cls_sufidx[l]] = X[idx]
         cls_sufidx[l] += 1
     affinity_mat = np.zeros([len(X), len(X)])
-    for r in xrange(len(X)):
-        for c in xrange(r, len(X)):
+    for r in range(len(X)):
+        for c in range(r, len(X)):
             affinity_mat[r][c] = affinity_mat[c][r] = np.sqrt(np.sum((sorted_X[r] - sorted_X[c])**2))
     return affinity_mat
 
@@ -118,12 +118,12 @@ with open(config['processed_data_path'] + 'lasvegas_user_latlon.json', 'r') as X
 uids = X['uids']
 epsg3857_X = X['user_3857_X']
 address_X = X['user_X']
-epsg3857_X_all = X['user_3857_all']
+# epsg3857_X_all = X['user_3857_all']
 k = 20
 
 _X = epsg3857_X
 km_label = KMeans(n_clusters=k).fit_predict(_X)
-print silhouette_score(_X, km_label)
+print (silhouette_score(_X, km_label))
 # sp_label = SpectralClustering(n_clusters=k).fit_predict(_X)
 # print silhouette_score(_X, sp_label)
 # hac_label = AgglomerativeClustering(n_clusters=k).fit_predict(_X)
@@ -143,8 +143,8 @@ print silhouette_score(_X, km_label)
 # max_eps = 0.
 # max_minsample = 0
 # max_k = -1 
-# for i in xrange(1, 10):
-#     for ms in xrange(2, 19):
+# for i in range(1, 10):
+#     for ms in range(2, 19):
 #         print '====================='
 #         print 'eps=%f, min_sample=%f'%(i*0.0000002, ms)
 #         db_label = DBSCAN(eps=.0000002 * i, min_samples=ms).fit_predict(_X)
@@ -161,19 +161,19 @@ print silhouette_score(_X, km_label)
 def _scale(mat):
     mean = mat.mean()
     std_var = np.sqrt(mat.var())
-    for i in xrange(len(mat)):
-        for j in xrange(i+1, len(mat)):
+    for i in range(len(mat)):
+        for j in range(i+1, len(mat)):
             if mat[i][j] > 2.5 * mean:
                 mat[i][j] = mat[j][i] = mean * 2.5
     return mat
 
 km_affi_mat = resort_affi(_X, km_label)
-print 'min=%f'%km_affi_mat.min()
-print 'max=%f'%km_affi_mat.max()
-print 'mean=%f'%km_affi_mat.mean()
-print '>2.5*mean:%d'%len(km_affi_mat[km_affi_mat>2.5*km_affi_mat.mean()])
+print ('min=%f'%km_affi_mat.min())
+print ('max=%f'%km_affi_mat.max())
+print ('mean=%f'%km_affi_mat.mean())
+print ('>2.5*mean:%d'%len(km_affi_mat[km_affi_mat>2.5*km_affi_mat.mean()]))
 heatmap(km_affi_mat, 'GeoM+KMeans')
-print 'KMeans'
+print ('KMeans')
 # sp_affi_mat = resort_affi(_X, sp_label)
 # sp_affi_mat = _scale(sp_affi_mat)
 # heatmap(sp_affi_mat, 'GeoM+Spectral')

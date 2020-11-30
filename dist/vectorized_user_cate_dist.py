@@ -53,7 +53,7 @@ class CateTree:
             insert a category path to category tree, if the path has been
             inserted, then add 1 to bus_cnt
             
-            @cate_path: a category path 
+            @cate_path: list, a category path 
         '''
 
         if type(cate_path) != list:
@@ -80,7 +80,7 @@ class CateTree:
         '''
             calculate similarity between a user and this tree
 
-            @path_set: a set of paths, [ [<path_1>], [<path_2>], ...]
+            @path_set: list, a set of paths, [ [<path_1>], [<path_2>], ...]
 
             #return: a float
         '''
@@ -117,15 +117,12 @@ def vectorized_convertor(uid, bus_cate_dict, kwargs):
     '''
         convert a user's category data to data a vector
 
-        @uid: user id
-        @bus_cate_dict: a dict whose keys are business ids and values are category paths
+        @uid: str, user id
+        @bus_cate_dict: dict, a dict whose keys are business ids and values are category paths
         @kwargs: a dict of other parameter, {'pivots':[], 'sigma': val} 
 
         #return: feature vector
     '''
-    
-    if type(bus_cate_dict) != dict:
-        raise Exception('bus_cate_dict must be a dict')
 
     pivots = kwargs['pivots']
     if type(pivots) != list:
@@ -134,8 +131,6 @@ def vectorized_convertor(uid, bus_cate_dict, kwargs):
         sigma = kwargs['sigma']
     except Exception as e:
         sigma = 0.
-    if type(sigma) != float and type(sigma)!=int and type(sigma)!=list:
-        raise Exception('sigma in kwargs must be a float or an int or an list')
 
     feature_arr = [0.0 for i in range(len(pivots))]
     path_sets = []

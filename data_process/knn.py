@@ -12,10 +12,10 @@ sigmas = [0.001, 0.0001, 0.00001, 0.000001, 0.0000001, 0.00000001]
 # load 3w user data
 
 dataset = 'amazon'
-if dataset == 'amazon':
+if dataset == 'amazon': # line number 12280; index 12279
     data_file_name = 'amazon_dist_ub_line.json'
     business_file_name = '/data/rec_dataset/amazon/amazon_business_category_line.json'
-else:
+else: # yelp line number 16581; index 16580
     data_file_name = 'yelp_dist_ub_line.json'
     business_file_name = '/data/rec_dataset/yelp/processed/business_line.json'
 
@@ -34,8 +34,12 @@ def cluster_convertor(uid, bus_cate_dict, kwargs):
     return ret
 data = np.array(dataloader.load(cluster_convertor, pivots = pivots))
 
-selected_uid_idx = random.choice(range(len(uids)))
-k = 5
+if dataset=='amazon':
+    uid = 'A193RX3PCIPLZV'
+else:
+    uid = '18qEoFOVEernpVLh97PQPQ'
+selected_uid_idx = uids.index(uid)
+k = 3000
 knn_uid_idx = []
 knn_uid_dists = []
 
@@ -54,5 +58,5 @@ rlt_data = {
     'bus_cate': [[uid_bus[uids[i]] for i in idxs] for idxs in knn_uid_idx]
 }
 
-with open('%s_knn_out.json'%dataset, 'w') as out:
+with open('/data/SDM_result/figure/knn_result/cate_many_%s_knn_out.json'%dataset, 'w') as out:
     json.dump(rlt_data, out)

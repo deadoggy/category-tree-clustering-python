@@ -6,6 +6,7 @@ from data_loader.data_loader import DataLoader
 from copy import deepcopy, copy
 import random
 import json
+import numpy as np
 
 dataloader = DataLoader()
 print("load finished")
@@ -14,7 +15,7 @@ print("load finished")
 YELP_DIMENSION = 22
 AMAZON_DIMENSION = 85
 
-SOURCE_DATASET = ''
+SOURCE_DATASET = 'YELP'
 
 ori_pivots = {}
 
@@ -42,18 +43,19 @@ else:
 def cluster_convertor(uid, bus_cate_dict, kwargs):
     global flag
     pivots = deepcopy(ori_pivots)
-    for bid in bus_cate_dict:
-        for cate_path in bus_cate_dict[bid]:
-            if cate_path[0] not in pivots:
-                pivots[cate_path[0]] = 0
-            pivots[cate_path[0]] += 1
+    if len(bus_cate_dict) >= 4:
+        for bid in bus_cate_dict:
+            for cate_path in bus_cate_dict[bid]:
+                if cate_path[0] not in pivots:
+                    pivots[cate_path[0]] = 0
+                pivots[cate_path[0]] += 1
     return [ uid, list(pivots.values()) ]
 
 print( "loading users" )
 
 data = dataloader.load(cluster_convertor)
 
-print( "loading users done" )
+print( "loading users done")
 
 if len(data[0][1]) != AMAZON_DIMENSION:
     AMAZON_DIMENSION = len(data[0][1])
@@ -63,57 +65,63 @@ print( len(data) )
 
 
 # sizes_list = [
-#     [1000, 600, 600, 800],
-#     [1000, 50, 550, 1400],
-#     [2000, 200, 300, 500],
-#     [200, 400, 100, 300, 800, 600, 750, 150, 900]
+#     # [1000, 600, 600, 800],
+#     # [1000, 50, 550, 1400],
+#     # [2000, 200, 300, 500],
+#     [200, 400, 100, 300, 200, 600, 750, 150]
 # ]
 
-sizes_list = [[10000, 8000, 6000, 7000, 9000, 11000, 9000, 5000, 5000, 10000, 8000, 5000, 7000]]
+# sizes_list = [[10000, 8000, 6000, 7000, 9000, 11000, 9000, 5000, 5000, 10000, 8000, 5000, 7000]]
 
 for sizes in sizes_list:
     valid_user = []
     label = []
     dimension_cnt = []
     d_index = range(AMAZON_DIMENSION)
-    current_label = 0
     current_size_index = 0
+    existed_dim = set()
 
-    for d in d_index:
+    for current_size_index in range(len(sizes)):
+        print('current size index: %d'%current_size_index)
         size = sizes[current_size_index]
-        d_valid_uid = []
-        d_dim_cnt = []
-        for item in data:
-            uid = item[0]
-            vec = item[1]
-            if len(set(vec)) <= 2:
+        for d in d_index:
+            if d in existed_dim:
                 continue
-            # if vec[-1] > 0:
-            #     continue
-            max_dim = max(vec)
-            if max_dim != vec[d] or vec.count(max_dim) > 1:
-                continue
-            # if max_dim < 3:
-            #     continue
-            second_max = -1
-            for val in vec:
-                if val < max_dim and val > second_max:
-                    second_max = val
-            if (float(second_max) / float(max_dim)) >= .0 and (float(second_max) / float(max_dim)) <= .4:
-                if item[0] not in valid_user and item[0] not in d_valid_uid:
-                    d_valid_uid.append(item[0])
-                    d_dim_cnt.append(item[1])
-                if len(d_valid_uid) == size:
-                    print( d )
-                    valid_user.extend(d_valid_uid)
-                    dimension_cnt.extend(d_dim_cnt)
-                    label.extend([current_label for i in range(size)])
-                    current_size_index += 1
-                    current_label += 1
-                    break
-        if current_size_index == len(sizes):
-            break
 
+            d_valid_uid = []
+            d_dim_cnt = []
+            flag = False
+            for item in data:
+                uid = item[0]
+                vec = item[1]
+                if len(np.nonzero(vec)[0]) <= 1:
+                    continue
+                # if vec[-1] > 0:
+                #     continue
+                max_dim = max(vec)
+                if max_dim != vec[d] or vec.count(max_dim) > 1:
+                    continue
+                # if max_dim < 3:
+                #     continue
+                second_max = -1
+                for val in vec:
+                    if val < max_dim and val > second_max:
+                        second_max = val
+                if (float(second_max) / float(max_dim)) >= .0 and (float(second_max) / float(max_dim)) <= .6:
+                    if item[0] not in valid_user and item[0] not in d_valid_uid:
+                        d_valid_uid.append(item[0])
+                        d_dim_cnt.append(item[1])
+                    if len(d_valid_uid) == size:
+                        print( d )
+                        existed_dim.add(d)
+                        valid_user.extend(d_valid_uid)
+                        dimension_cnt.extend(d_dim_cnt)
+                        label.extend([current_size_index for i in range(size)])
+                        flag = True
+                        print('     dim index: %d'%d)
+                        break
+            if flag:
+                break
     if len(set(valid_user)) != len(valid_user):
         print( "Duplicates" )
 
@@ -122,9 +130,9 @@ for sizes in sizes_list:
     for s in sizes:
         FILE_NAME += "_%d"%s
 
-    with open('/home/yinjia/experiment_dataset/clustering/%s'%FILE_NAME, 'w') as uid_out:
-        with open('/home/yinjia/experiment_dataset/clustering/%s_label'%FILE_NAME, 'w') as  label_out:
-            with open('/home/yinjia/experiment_dataset/clustering/%s_dim_count'%FILE_NAME, 'w') as vec_out:
+    with open('/home/yinjia/experiment_dataset/clustering/wsdm/%s'%FILE_NAME, 'w') as uid_out:
+        with open('/home/yinjia/experiment_dataset/clustering/wsdm/%s_label'%FILE_NAME, 'w') as  label_out:
+            with open('/home/yinjia/experiment_dataset/clustering/wsdm/%s_dim_count'%FILE_NAME, 'w') as vec_out:
                 for u in valid_user:
                     uid_out.write(u)
                     if u != valid_user[-1]:

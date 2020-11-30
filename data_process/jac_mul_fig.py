@@ -43,7 +43,7 @@ sigmas = [0.001, 0.0001, 0.00001, 0.000001, 0.0000001, 0.00000001]
 #     print out_dict
 #     json.dump(out_dict, dis_out)
 
-with open('/data/SDM_result/Jaccard/amazon_distance_stat.json', 'r') as distance_in:
+with open('/data/SDM_result/Jaccard/yelp_distance_stat.json', 'r') as distance_in:
     dist_json = json.load(distance_in)
     vec_stat = dist_json['vec_stat']
     jac_stat = dist_json['jac_stat']
@@ -76,14 +76,15 @@ x_labels = [ "0.00", "", "0.04", "", "0.08", "", "0.12", "", "0.16", "", "0.20",
 
 
 fig = plt.figure()
-ax1 = plt.subplot2grid((1, 10), (0, 0), colspan=2)
-ax2 = plt.subplot2grid((1, 10), (0, 2), colspan=2)
-ax3 = plt.subplot2grid((1, 10), (0, 4), colspan=2)
-ax4 = plt.subplot2grid((1, 10), (0, 6), colspan=2)
-ax5 = plt.subplot2grid((1, 10), (0, 8), colspan=2)
+ax1 = plt.subplot2grid((1, 8), (0, 0), colspan=2)
+ax2 = plt.subplot2grid((1, 8), (0, 2), colspan=2)
+ax3 = plt.subplot2grid((1, 8), (0, 4), colspan=2)
+ax4 = plt.subplot2grid((1, 8), (0, 6), colspan=2)
+# ax5 = plt.subplot2grid((1, 10), (0, 8), colspan=2)
+sigmas = ['$10^{-3}$', '$10^{-4}$','$10^{-5}$','$10^{-6}$',]
 
-axs = [ax1, ax2, ax3, ax4, ax5]
-
+axs = [ax1, ax2, ax3, ax4,]
+axs = [plt.subplot()]
 
 fig.set_figwidth(12)
 fig.set_figheight(3.5)
@@ -93,19 +94,20 @@ formatter.set_scientific(True)
 formatter.set_powerlimits((-1,1)) 
 
 for d, ax in enumerate(axs):
-    if d>=len(vec_stat):
+    if d>=len(vec_stat)-1:
         continue
     
     i=d-1
     y_step = int(max(vec_stat[i+1])/10)
     y_label = [ j*y_step for j in range(10)]
-    ax.grid()
+    # ax.grid()
     ax.bar(x_keys,vec_stat[i+1], width=-1., align='edge', color='#000000', edgecolor='#ffffff')
     
     # if i > 2:
     #     ax.set_xlabel('jaccard similarity', fontsize=13)
-    format_str = r"$\sigma$: %.1e"
-    ax.text(x=x_keys[-10], y=max(vec_stat[i+1])*0.7, s=format_str%sigmas[i+1], fontsize=13)
+    # format_str = r"$\sigma$: %.1f"
+    # ax.text(x=x_keys[-10], y=max(vec_stat[i+1])*0.7, s=format_str%sigmas[i+1], fontsize=13)
+    ax.text(x=x_keys[-10], y=max(vec_stat[i+1])*0.7, s='$\sigma$: '+sigmas[d], fontsize=13)
     # ax.set_ylabel('average vuc distance',fontsize=14)
     ax.set_yticklabels(y_label, fontsize=11)
     ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right", fontsize=11)

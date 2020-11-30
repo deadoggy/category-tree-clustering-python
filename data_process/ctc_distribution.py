@@ -45,7 +45,7 @@ max_min_v = [[0.135873, 0.0], [1.783011, 0.0], [4.546957, 4e-06], [4.473014, 0.0
 ctc_step = []
 for maxmin in max_min_v:
     ctc_step.append((maxmin[0] - maxmin[1])/20.)
-ctc_dist_data = [[0 for i in xrange(20)] for idx in xrange(len(sigmas))]
+ctc_dist_data = [[0 for i in range(20)] for idx in range(len(sigmas))]
 
 
 # print time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())) + " begin loading"
@@ -96,17 +96,17 @@ ctc_dist_data = [
  ]
 
 fig = plt.figure()
-# ax1 = plt.subplot2grid((1, 8), (0, 0), colspan=2)
-# ax2 = plt.subplot2grid((1, 8), (0, 2), colspan=2)
-# ax3 = plt.subplot2grid((1, 8), (0, 4), colspan=2)
-# ax4 = plt.subplot2grid((1, 8), (0, 6), colspan=2)
+ax1 = plt.subplot2grid((1, 8), (0, 0), colspan=2)
+ax2 = plt.subplot2grid((1, 8), (0, 2), colspan=2)
+ax3 = plt.subplot2grid((1, 8), (0, 4), colspan=2)
+ax4 = plt.subplot2grid((1, 8), (0, 6), colspan=2)
 
-# axs = [ax1, ax2, ax3, ax4]
+axs = [ax1, ax2, ax3, ax4]
 
-axs = [plt.subplot()]
+# axs = [plt.subplot()]
 
-fig.set_figwidth(15)
-fig.set_figheight(10)
+fig.set_figwidth(12)
+fig.set_figheight(3.5)
 
 formatter = ticker.ScalarFormatter(useMathText=True)
 formatter.set_scientific(True) 
@@ -118,11 +118,11 @@ for i, ax in enumerate(axs):
         continue
     min_v = max_min_v[i][1]
     step = ctc_step[i]
-    x = [ "%.4f"%(min_v + j*step) for j in xrange(21)]
-    x_labels = [ "%.4f"%(min_v + j*step)  if (j)%5==0 or j==0 else "" for j in xrange(21)]
+    x = [ "%.4f"%(min_v + j*step) for j in range(21)]
+    x_labels = [ "%.4f"%(min_v + j*step)  if (j)%5==0 or j==0 else "" for j in range(21)]
     y = ctc_dist_data[i] + [0]
     y_step = int(max(y)/10)
-    y_labels = [ j*y_step for j in xrange(10)]
+    y_labels = [ j*y_step for j in range(10)]
     ax.bar(x, y, width=1., align='edge', color='#696969',edgecolor='#ffffff')
     # lv = -1.
     # for zi, (a, b) in enumerate(zip(x, y)):
@@ -132,7 +132,7 @@ for i, ax in enumerate(axs):
     # ax.set_xlabel('Vuc Distance',fontsize=14)
     # ax.set_ylabel('count',fontsize=16)
     ax.text(x=x[-8], y=max(y)*0.55, s="$\sigma$: %.3f"%sigmas[i])
-    ax.set_xticklabels(x_labels, rotation=30, fontsize=20)
+    ax.set_xticklabels(x_labels, rotation=30, fontsize=2)
     ax.set_yticklabels(y_labels)
     ax.yaxis.set_major_formatter(formatter)
     

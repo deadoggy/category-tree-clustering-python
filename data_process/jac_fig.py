@@ -84,42 +84,42 @@ plt.tight_layout()
 plt.show()
 
 
-# fig = plt.figure()
-# # ax1 = plt.subplot2grid((1, 8), (0, 0), colspan=2)
-# # ax2 = plt.subplot2grid((1, 8), (0, 2), colspan=2)
-# # ax3 = plt.subplot2grid((1, 8), (0, 4), colspan=2)
-# # ax4 = plt.subplot2grid((1, 8), (0, 6), colspan=2)
+fig = plt.figure()
+ax1 = plt.subplot2grid((1, 8), (0, 0), colspan=2)
+ax2 = plt.subplot2grid((1, 8), (0, 2), colspan=2)
+ax3 = plt.subplot2grid((1, 8), (0, 4), colspan=2)
+ax4 = plt.subplot2grid((1, 8), (0, 6), colspan=2)
 
-# # axs = [ax1, ax2, ax3, ax4,]
+axs = [ax1, ax2, ax3, ax4,]
 
 # axs = [plt.subplot()] 
 
-# fig.set_figwidth(15)
-# fig.set_figheight(10)
+fig.set_figwidth(12)
+fig.set_figheight(3.5)
 
-# formatter = ticker.ScalarFormatter(useMathText=True)
-# formatter.set_scientific(True) 
-# formatter.set_powerlimits((-1,1)) 
+formatter = ticker.ScalarFormatter(useMathText=True)
+formatter.set_scientific(True) 
+formatter.set_powerlimits((-1,1)) 
 
-# for d, ax in enumerate(axs):
-#     if d>=len(vec_stat):
-#         continue
+for d, ax in enumerate(axs):
+    if d>=len(vec_stat):
+        continue
     
-#     y_step = int(max(vec_stat)/10)
-#     y_label = [ j*y_step for j in xrange(10)]
-#     ax.bar(x_keys,vec_stat, width=-1., align='edge', color='#696969', edgecolor='#ffffff')
-#     # if i > 2:
-#     #     ax.set_xlabel('jaccard similarity', fontsize=13)
-#     # ax.text(x=x_keys[-6], y=max(vec_stat[i+1])*0.7, s=r"$\sigma$: %.3f"%sigmas[i+1])
-#     # ax.set_ylabel('average vuc distance',fontsize=14)
-#     ax.set_yticklabels(y_label)
-#     ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right")
-#     # if i> 2:
-#     #     ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right", fontsize=14)
-#     # else:
-#     #     ax.set_xticklabels(non_x_labels)
-#     ax.yaxis.set_major_formatter(formatter)
+    y_step = int(max(vec_stat[d])/10)
+    y_label = [ j*y_step for j in range(10)]
+    ax.bar(x_keys,vec_stat[d], width=-1., align='edge', color='#000000', edgecolor='#ffffff')
+    # if i > 2:
+    #     ax.set_xlabel('jaccard similarity', fontsize=13)
+    # ax.text(x=x_keys[-6], y=max(vec_stat[i+1])*0.7, s=r"$\sigma$: %.3f"%sigmas[i+1])
+    # ax.set_ylabel('average vuc distance',fontsize=14)
+    ax.set_yticklabels(y_label)
+    ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right")
+    # if i> 2:
+    #     ax.set_xticklabels(x_labels, rotation=45, horizontalalignment="right", fontsize=14)
+    # else:
+    #     ax.set_xticklabels(non_x_labels)
+    ax.yaxis.set_major_formatter(formatter)
 
-# plt.tight_layout()
-# #plt.savefig('CateVecDist-Jaccard.png')
-# plt.show()
+plt.tight_layout()
+#plt.savefig('CateVecDist-Jaccard.png')
+plt.show()
