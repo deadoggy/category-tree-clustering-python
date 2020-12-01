@@ -55,19 +55,19 @@ data, lonlat_data = get_data()
 
 max_k = int(np.sqrt(len(lonlat_data)))
 mse = []
-print "max_k: %d"%max_k
-for ki in xrange(2, max_k):
-    print ki
+print ("max_k: %d"%max_k)
+for ki in range(2, max_k):
+    print (ki)
     km =KMeans(n_clusters=ki)
     _labels = km.fit_predict(lonlat_data)
-    ctr_sum = [np.array([0. for i in xrange(2)]) for i in xrange(len(set(_labels)))]
-    ctr_size = [0 for i in xrange(len(set(_labels)))]
+    ctr_sum = [np.array([0. for i in range(2)]) for i in range(len(set(_labels)))]
+    ctr_size = [0 for i in range(len(set(_labels)))]
     for j, d in enumerate(lonlat_data):
         ctr_sum[_labels[j]] += d
         ctr_size[_labels[j]] += 1
-    for k in xrange(len(set(_labels))):
+    for k in range(len(set(_labels))):
         ctr_sum[k] /= ctr_size[k]
-    y_predict = [ ctr_sum[_labels[x]] for x in xrange(len(data)) ]
+    y_predict = [ ctr_sum[_labels[x]] for x in range(len(data)) ]
     mse.append(mean_squared_error(y_predict, lonlat_data))
 
 plt.plot(mse)

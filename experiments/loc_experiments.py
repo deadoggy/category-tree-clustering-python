@@ -17,8 +17,9 @@ from config.load_config import Config
 import os
 import json
 import random
-from pyproj import Proj, itransform
-
+from pyproj import Proj, itransform, transform
+import warnings
+warnings.filterwarnings("ignore")
 
 config = Config().config
 
@@ -34,42 +35,41 @@ formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
-def latlon_to_3857(points):
-    p1 = Proj(init='epsg:4326')
-    p2 = Proj(init='epsg:3857')
-    return itransform(p1, p2, points)
-    
+# def latlon_to_3857(points):
+#     p1 = Proj(init='epsg:4326')
+#     p2 = Proj(init='epsg:3857')
+#     return itransform(p1, p2, points)
 
-loc_dataloader = LocDataLoader('lasvegas_business.json','lasvegas_ub.json',2)
-pivots = loc_dataloader.generate_pivots()
-data = loc_dataloader.load(vectorized_convertor, pivots=pivots)
+# loc_dataloader = LocDataLoader('lasvegas_business.json','lasvegas_ub.json',2)
+# pivots = loc_dataloader.generate_pivots()
+# data = loc_dataloader.load(vectorized_convertor, pivots=pivots)
 
-print ('load done')
+# print ('load done')
 
-# root_name = []
-# for p in pivots:
-#     root_name.append(p.root.chd_set[0].label)
+# # root_name = []
+# # for p in pivots:
+# #     root_name.append(p.root.chd_set[0].label)
 
-# with open("/home/yinjia/pivots_name.txt", "w") as o:
-#     for n in root_name:
-#         o.write(n)
-#         o.write('\n')
-# exit()
-# with open(config['processed_data_path'] + 'lasvegas_user_vec.json', 'w') as out:
-#     json.dump(data, out)
+# # with open("/home/yinjia/pivots_name.txt", "w") as o:
+# #     for n in root_name:
+# #         o.write(n)
+# #         o.write('\n')
+# # exit()
+# # with open(config['processed_data_path'] + 'lasvegas_user_vec.json', 'w') as out:
+# #     json.dump(data, out)
 
 
-''' generate 5000 users '''
+# ''' generate 5000 users '''
 
-# with open(config['processed_data_path'] + 'lasvegas_user_vec.json') as vec_in:
-#     user_data = json.load(vec_in)
-user_data = data
-with open(config['processed_data_path'] + 'lasvegas_user_latlon.json') as latlon_in:
-    user_latlon = json.load(latlon_in)
+# # with open(config['processed_data_path'] + 'lasvegas_user_vec.json') as vec_in:
+# #     user_data = json.load(vec_in)
+# user_data = data
+# with open(config['processed_data_path'] + 'lasvegas_user_latlon.json') as latlon_in:
+#     user_latlon = json.load(latlon_in)
 
-# calculate center of latlon
-print ('convert lat/lon to 3857')
-user_3857_data = {}
+# # calculate center of latlon
+# print ('convert lat/lon to 3857')
+# user_3857_data = {}
 # for idx, uid in enumerate(user_latlon.keys()):
 #     if idx%10==0:
 #         print ("%d / %d"%(idx, len(user_latlon)))
@@ -84,32 +84,32 @@ user_3857_data = {}
 #     user_3857_data[uid] = np.mean( np.array(convert_rlt) , axis=1).tolist()
 
 
-    # for lat_lon in user_latlon[uid]:
-    #     x2, y2 = latlon_to_3857(lat_lon[0], lat_lon[1])
-    #     ctr_x += x2
-    #     ctr_y += y2
-    # l = len(user_latlon[uid])
-    # user_3857_data[uid] = [ctr_x/l, ctr_y/l]
+#     # for lat_lon in user_latlon[uid]:
+#     #     x2, y2 = latlon_to_3857(lat_lon[0], lat_lon[1])
+#     #     ctr_x += x2
+#     #     ctr_y += y2
+#     # l = len(user_latlon[uid])
+#     # user_3857_data[uid] = [ctr_x/l, ctr_y/l]
 
-# #uniform the orders
+# # #uniform the orders
 
-user_X = []
-user_3857_X = []
-uids = []
-print ('sampling')
+# user_X = []
+# user_3857_X = []
+# uids = []
+# print ('sampling')
 
-while True:
-    for uid in random.sample(user_data.keys(), 50):
-        if len(set(user_data[uid])) >= 4 and len(user_X)<1000:
-            uids.append(uid)
-            user_X.append(user_data[uid])
-            #user_3857_X.append(user_3857_data[uid])
-    if 1000 == len(user_X):
-        break
+# while True:
+#     for uid in random.sample(user_data.keys(), 50):
+#         if len(set(user_data[uid])) >= 4 and len(user_X)<5000:
+#             uids.append(uid)
+#             user_X.append(user_data[uid])
+#             user_3857_X.append(user_3857_data[uid])
+#     if 5000 == len(user_X):
+#         break
         
-user_loc = []
-for uid in uids:
-    user_loc.append(list(user_latlon[uid]))
+# user_loc = []
+# for uid in uids:
+#     user_loc.append(list(user_latlon[uid]))
 
 
 # with open(config['processed_data_path'] + 'lasvegas_X_late.json', 'w') as X_out:
@@ -117,16 +117,14 @@ for uid in uids:
 
 
 # ''' run alg '''
-# with open(config['processed_data_path'] + 'lasvegas_X.json', 'r') as X_in:
-#     X = json.load(X_in)
+with open(config['processed_data_path'] + 'lasvegas_X.json', 'r') as X_in:
+    X = json.load(X_in)
 
-# epsg3857_X = X['user_3857_X']
-# address_X = X['user_X']
+epsg3857_X = X['user_3857_X']
+address_X = X['user_X']
 
-epsg3857_X = user_3857_X
-address_X = user_X
 
-n_clusters = 10
+
 
 def eul(a,b):
     return np.sqrt(np.sum(np.power((a-b)**2,2)))
@@ -157,42 +155,51 @@ def cls_size(label):
     return rlt 
 
 #address
-#X_list = [np.array(address_X) ,np.array(epsg3857_X)]
-# X_names = ['address','epsg3857']
-X_list = [np.array(address_X)]
-X_names = ['address']
+X_list = [  np.array(epsg3857_X)]
+X_names = [  'epsg3857']
+# X_list = [np.array(address_X)]
+# X_names = ['address']
 
-km_labels = []
-spec_labels = []
 
-for k in range(2,33 ):
-    for idx, _X in enumerate(X_list):
+for idx, _X in enumerate(X_list):
+    _X = minmax_scale(_X, axis=0)
+    km_labels = []
+    spec_labels = []
+    km_mse = []
+    km_sc = []
+    sp_mse = []
+    sp_sc = []
+    hac_mse = []
+    hac_sc = [] 
+    for k in range(2,40):
         X_name = X_names[idx]
         #kmeans
         km_label = KMeans(n_clusters=k).fit_predict(_X)
         # print (km_label)
-        km_sc = sc(_X, km_label)
-        print (km_sc)
-        km_mse = mse(_X, km_label)
+        km_sc.append(sc(_X, km_label))
+        logging.info('km:%d'%k)
+        km_mse.append(mse(_X, km_label))
         km_cls_size = str(cls_size(km_label))
-        logging.info('KMeans, %s, k=%d, sc=%f, mse=%f, size=%s'%(X_name, k, km_sc, km_mse, km_cls_size))
+        # logging.info('KMeans, %s, k=%d, sc=%f, mse=%f, size=%s'%(X_name, k, km_sc, km_mse, km_cls_size))
         km_labels.append(km_label)
 
         #spectral
         
-        sp_label = SpectralClustering(n_clusters=k).fit_predict(_X)
-        sp_sc = sc(_X, sp_label)
-        sp_mse = mse(_X, sp_label)
+        sp_label = SpectralClustering(n_clusters=k, eigen_solver='amg', n_jobs=8).fit_predict(_X)
+        sp_sc.append(sc(_X, sp_label))
+        sp_mse.append(mse(_X, sp_label))
+        logging.info('sp:%d'%k)
         sp_cls_size = str(cls_size(sp_label))
-        logging.info('Spectral, %s, k=%d, sc=%f, mse=%f, size=%s'%(X_name, k, sp_sc, sp_mse, sp_cls_size))
+        # logging.info('Spectral, %s, k=%d, sc=%f, mse=%f, size=%s'%(X_name, k, sp_sc, sp_mse, sp_cls_size))
         spec_labels.append(sp_label)
 
         #hierarchical
-        # ha_label = AgglomerativeClustering(n_clusters=k).fit_predict(_X)
-        # ha_sc = sc(_X, ha_label)
-        # ha_mse = mse(_X, ha_label)
-        # ha_cls_size = str(cls_size(ha_label))
+        ha_label = AgglomerativeClustering(n_clusters=k).fit_predict(_X)
+        hac_sc.append(sc(_X, ha_label))
+        hac_mse.append(mse(_X, ha_label))
+        logging.info('hac:%d'%k)
+        ha_cls_size = str(cls_size(ha_label))
         # logging.info('Hierarchical, %s, k=%d, sc=%f, mse=%f, size=%s'%(X_name, k, ha_sc, ha_mse, ha_cls_size))
     
-with open('mdm_result.js', 'w') as out:
-    json.dump({'locations': np.array(user_loc).tolist(), 'sp_labels': np.array(spec_labels).tolist(), 'km_labels': np.array(km_labels).tolist()}, out)
+    with open('mdm_result_%s.json'%X_names[idx], 'w') as out:
+        json.dump({'locations': np.array(_X).tolist(), 'sp_labels': np.array(spec_labels).tolist(), 'km_labels': np.array(km_labels).tolist(), 'km_sc': km_sc, 'km_mse':km_mse, 'sp_sc':sp_sc, 'sp_mse':sp_mse, 'hac_sc':hac_sc, 'hac_mse':hac_mse}, out)
