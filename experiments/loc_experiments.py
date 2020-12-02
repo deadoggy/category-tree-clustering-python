@@ -184,15 +184,20 @@ for idx, _X in enumerate(X_list):
         km_labels.append(km_label)
 
         #spectral
-        
-        sp_label = SpectralClustering(n_clusters=k, eigen_solver='amg', n_jobs=8).fit_predict(_X)
-        sp_sc.append(sc(_X, sp_label))
-        sp_mse.append(mse(_X, sp_label))
-        logging.info('sp:%d'%k)
-        sp_cls_size = str(cls_size(sp_label))
-        # logging.info('Spectral, %s, k=%d, sc=%f, mse=%f, size=%s'%(X_name, k, sp_sc, sp_mse, sp_cls_size))
-        spec_labels.append(sp_label)
-
+        try: 
+            sp_label = SpectralClustering(n_clusters=k, eigen_solver='amg', n_jobs=10).fit_predict(_X)
+            sp_sc.append(sc(_X, sp_label))
+            sp_mse.append(mse(_X, sp_label))
+            logging.info('sp:%d'%k)
+            sp_cls_size = str(cls_size(sp_label))
+            # logging.info('Spectral, %s, k=%d, sc=%f, mse=%f, size=%s'%(X_name, k, sp_sc, sp_mse, sp_cls_size))
+            spec_labels.append(sp_label)
+        except Exception as e:
+            sp_sc.append(0.)
+            sp_mse.append(0.)
+            logging.info('exception sp:%d'%k)
+            sp_cls_size = ''
+            spec_labels.append([])
         #hierarchical
         ha_label = AgglomerativeClustering(n_clusters=k).fit_predict(_X)
         hac_sc.append(sc(_X, ha_label))
@@ -202,4 +207,4 @@ for idx, _X in enumerate(X_list):
         # logging.info('Hierarchical, %s, k=%d, sc=%f, mse=%f, size=%s'%(X_name, k, ha_sc, ha_mse, ha_cls_size))
     
     with open('mdm_result_%s.json'%X_names[idx], 'w') as out:
-        json.dump({'locations': np.array(_X).tolist(), 'sp_labels': np.array(spec_labels).tolist(), 'km_labels': np.array(km_labels).tolist(), 'km_sc': km_sc, 'km_mse':km_mse, 'sp_sc':sp_sc, 'sp_mse':sp_mse, 'hac_sc':hac_sc, 'hac_mse':hac_mse}, out)
+        json.dump({'locations': np.array(_X).tolist(), 'sp_labels': np.array(spec_labels).tolist(), 'km_labels': np.array(km_labels).tolist(), 'km_sc': np.array(km_sc).tolist(), 'km_mse':np.array(km_mse).tolist(), 'sp_sc':np.array(sp_sc).tolist(), 'sp_mse':np.array(sp_mse).tolist(), 'hac_sc':np.array(hac_sc).tolist(), 'hac_mse':np.array(hac_mse).tolist()}, out)
